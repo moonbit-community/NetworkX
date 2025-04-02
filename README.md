@@ -1,2 +1,1 @@
-# NetworkX
-graph algorithms
+# smallbearrr/NetworkX
