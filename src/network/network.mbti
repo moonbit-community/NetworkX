@@ -1,0 +1,44 @@
+package "smallbearrr/NetworkX/network"
+
+// Values
+fn edge_count[N, E](Graph[N, E]) -> Int
+
+fn find_edge[N, E](Graph[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
+
+fn find_edge_undirected[N, E](Graph[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
+
+fn index(NodeIndex) -> Int
+
+fn node_count[N, E](Graph[N, E]) -> Int
+
+// Types and methods
+type EdgeIndex
+impl Show for EdgeIndex
+
+type Graph[N, E]
+impl Graph {
+  add_edge[N, E](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex
+  add_node[N, E](Self[N, E], weight? : N) -> NodeIndex
+  edge_count[N, E](Self[N, E]) -> Int
+  find_edge[N, E](Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
+  find_edge_undirected[N, E](Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
+  is_directed[N, E](Self[N, E]) -> Bool
+  new[N, E](directed~ : Bool = ..) -> Self[N, E]
+  node_count[N, E](Self[N, E]) -> Int
+  try_add_edge[N, E](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex!
+  try_add_node[N, E](Self[N, E], weight? : N) -> NodeIndex!
+}
+impl[N : Show, E : Show] Show for Graph[N, E]
+
+type NodeIndex
+impl NodeIndex {
+  index(Self) -> Int
+}
+impl Compare for NodeIndex
+impl Eq for NodeIndex
+impl Show for NodeIndex
+
+// Type aliases
+
+// Traits
+
