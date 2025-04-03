@@ -377,14 +377,18 @@ test "find_edge/undirected" {
 /// ```
 /// let dist = graph.dijkstra!(node_start, 0)
 /// ```
-pub fn Graph::dijkstra[N, E: Eq + Compare + Add + Sub](self: Graph[N, E], a: NodeIndex, offset : E) -> @hashmap.T[NodeIndex, E]! {
+pub fn Graph::dijkstra[N, E : Eq + Compare + Add + Sub](
+  self : Graph[N, E],
+  a : NodeIndex,
+  offset : E
+) -> @hashmap.T[NodeIndex, E]! {
   guard self.nodes.get(a.index()) is Some(_) else {
     raise NodeNotFound("Node not found")
   }
   let nodes_count = self.node_count()
   let vis = Array::make(nodes_count, false)
   let dist = @hashmap.new()
-  let q: @priority_queue.T[(E, NodeIndex)] = @priority_queue.new()
+  let q : @priority_queue.T[(E, NodeIndex)] = @priority_queue.new()
   q.push((offset, a))
   while not(q.is_empty()) {
     let (d, u) = q.pop().unwrap()
@@ -426,6 +430,7 @@ test "dijkstra/Int" {
   inspect!(dist[node_c].unwrap(), content="3")
 }
 
+///|
 test "dijkstra/Float" {
   let graph = Graph::new()
   let node_a = graph.add_node()
