@@ -61,8 +61,8 @@ fn EdgeIndex::new(
 }
 
 ///| Create a new Graph with directed edges.
-pub fn Graph::new[N, E]() -> Graph[N, E] {
-  Graph::{ nodes: [], edges: [], directed: true }
+pub fn Graph::new[N, E](directed~ : Bool = true) -> Graph[N, E] {
+  Graph::{ nodes: [], edges: [], directed}
 }
 
 ///|
@@ -196,4 +196,97 @@ test "add_edge/multi" {
   inspect!(graph.edges[edge_ac.ix].next.0.ix, content=node_a.ix.to_string())
   inspect!(graph.edges[edge_ac.ix].next.1.ix, content="2147483647")
   inspect!(graph.nodes[node_a.ix].next.0.ix, content=edge_ac.ix.to_string())
+}
+
+///|
+pub fn node_count[N, E](self : Graph[N, E]) -> Int {
+  self.nodes.length()
+}
+
+///|
+pub fn edge_count[N, E](self : Graph[N, E]) -> Int {
+  self.edges.length()
+}
+
+pub fn Graph::is_directed[N, E](self : Graph[N, E]) -> Bool {
+  self.directed
+}
+
+pub fn index(self: NodeIndex) -> Int {
+  self.ix
+}
+
+pub fn find_edge[N, E](self: Graph[N, E], a: NodeIndex, b: NodeIndex) -> Option[EdgeIndex] {
+  if not(self.directed) {
+    self.find_edge_undirected(a, b)
+  } else {
+    match self.nodes.get(a.index()){
+      None => None
+      Some(node) => self.find_edge_directed_from_node(node, b)
+    }
+  }
+}
+
+fn find_edge_directed_from_node[N, E](self: Graph[N, E], node: Node[N], b: NodeIndex) -> Option[EdgeIndex] {
+  let mut edix = node.next.0
+  while self.edges.get(edix.ix) is Some(edge) {
+    if edge.node.1 == b {
+      return Some(edix)
+    }
+    edix = edge.next.0
+  }
+  None
+}
+
+fn Node::next[N](self: Node[N], index : Int) -> EdgeIndex {
+  match index {
+    0 => self.next.0
+    1 => self.next.1
+    _ => abort("Node next get error")
+  }
+}
+
+fn Edge::node[E](self: Edge[E], index : Int) -> NodeIndex {
+  match index {
+    0 => self.node.0
+    1 => self.node.1
+    _ => abort("Edge node get error")
+  }
+}
+
+pub fn find_edge_undirected[N, E](self: Graph[N, E], a: NodeIndex, b: NodeIndex) -> Option[EdgeIndex] {
+  match self.nodes.get(a.index()){
+    None => None
+    Some(node) => self.find_edge_undirected_from_node(node, b)
+  }
+}
+
+fn find_edge_undirected_from_node[N, E](self: Graph[N, E], node: Node[N], b: NodeIndex) -> Option[EdgeIndex] {
+  for i in 0..<2{
+    let mut edix = node.next(i)
+    while self.edges.get(edix.ix) is Some(edge) {
+      if edge.node(1-i) == b {
+        return Some(edix)
+      }
+      edix = edge.next.0
+    }
+  }
+  None
+}
+
+test "find_edge/directed" {
+  let graph = Graph::new()
+  let node_a = graph.add_node(weight=0)
+  let node_b = graph.add_node(weight=1)
+  let _ = graph.add_edge(node_a, node_b, weight=1)
+  inspect!(graph.find_edge(node_a, node_b).unwrap().ix, content="0")
+}
+
+
+test "find_edge/undirected" {
+  let graph = Graph::new(directed=false)
+  let node_a = graph.add_node(weight=0)
+  let node_b = graph.add_node(weight=1)
+  let _ = graph.add_edge(node_a, node_b, weight=1)
+  inspect!(graph.find_edge_undirected(node_a, node_b), content="Some({ix: 0, from: {ix: 2147483647}, successor_index: -1})")
 }
