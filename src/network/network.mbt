@@ -1,102 +1,154 @@
 struct NodeIndex {
   ix : Int
-}
+} derive(Eq, Compare, Show)
 struct EdgeIndex {
   ix : Int
   from : NodeIndex
-  successor_index : UInt
-}
+  successor_index : Int
+} derive(Show)
 struct Node[N] {
   ix : NodeIndex
-  weight : N
-  next : (EdgeIndex, EdgeIndex)
-}
+  weight : Option[N]
+  mut next : (EdgeIndex, EdgeIndex)
+} derive(Show)
 
 struct Edge[E] {
   ix : EdgeIndex
-  weight : E
-  next : EdgeIndex
+  weight : Option[E]
+  mut next : (EdgeIndex, EdgeIndex)
   node : (NodeIndex, NodeIndex)
-}
+} derive(Show)
 
 struct Graph[N, E] {
   nodes : Array[Node[N]]
   edges : Array[Edge[E]]
   directed : Bool
+} derive(Show)
+
+///|
+fn NodeIndex::end() -> NodeIndex {
+  NodeIndex::{ix : @int.max_value}
 }
 
-// struct Graph[T]{
-//   matrix : @hashmap.T[T, Array[T]];
-//   directed : Bool
-// } derive(Show)
+///|
+fn NodeIndex::new(ix : Int) -> NodeIndex {
+  NodeIndex::{ix : ix}
+}
 
-// ///|
-// pub fn Graph::from_hashmap[T:Compare+Hash](edges : @hashmap.T[T, Array[T]], directed : Bool) -> Graph[T] {
-//   let matrix: @hashmap.T[T, Array[T]] = match directed {
-//     false => {
-//       let mp = @hashmap.new()
-//       for e in edges {
-//         let u = e.0
-//         for v in e.1 {
-//           match mp[u] {
-//             None => mp[u] = [v]
-//             Some(l) if not(l.contains(v)) => l.push(v)
-//             _ => ()
-//           }
-//           match mp[v] {
-//             None => mp[v] = [u]
-//             Some(l) if not(l.contains(u)) => l.push(u)
-//             _ => ()
-//           }
-//         }
-//       }
-//       mp
-//     }
-//     true => edges
-//   }
-//   Graph::{
-//     matrix,
-//     directed
-//   }
-// }
+///|
+fn EdgeIndex::end() -> EdgeIndex {
+  EdgeIndex::{ix : @int.max_value, from : NodeIndex::end(), successor_index : @int.max_value}
+}
 
-// ///|
-// test "Graph::from_hashmap" {
-//   let mp: @hashmap.T[Int, Array[Int]] = @hashmap.of([(1, [2]), (2, [3])])
-//   let g = Graph::from_hashmap(mp, false)
-//   inspect!(g, content="{matrix: HashMap::of([(2, [3, 1]), (1, [2]), (3, [2])]), directed: false}")
-//   let g2 = Graph::from_hashmap(mp, true)
-//   inspect!(g2, content="{matrix: HashMap::of([(2, [3]), (1, [2])]), directed: true}")
-// }
+///|
+fn EdgeIndex::new(ix : Int, from : NodeIndex, successor_index : Int) -> EdgeIndex {
+  EdgeIndex::{ix : ix, from : from, successor_index : successor_index}
+}
 
-// ///|
-// pub fn Graph::add_edge[T: Hash+Eq](self : Graph[T], u : T, v : T) -> Unit {
-//   match self.matrix[u] {
-//     None => self.matrix[u] = [v]
-//     Some(l) if not(l.contains(v)) => l.push(v)
-//     _ => ()
-//   }
-//   if not(self.directed) {
-//     match self.matrix[v] {
-//       None => self.matrix[v] = [u]
-//       Some(l) if not(l.contains(u)) => l.push(u)
-//       _ => ()
-//     }
-//   }
-// }
+///| Create a new Graph with directed edges.
+pub fn Graph::new[N, E]() -> Graph[N, E] {
+  Graph::{
+    nodes : [],
+    edges : [],
+    directed : true
+  }
+}
 
-// ///|
-// test "Graph::add_edge" {
-//   let mp: @hashmap.T[Int, Array[Int]] = @hashmap.of([(1, [2])])
-//   let g = Graph::from_hashmap(mp, true)
-//   g.add_edge(2, 3)
-//   inspect!(g, content="{matrix: HashMap::of([(2, [3]), (1, [2])]), directed: true}")
-//   let g2 = Graph::from_hashmap(mp, false)
-//   g2.add_edge(2, 3)
-//   inspect!(g2, content="{matrix: HashMap::of([(2, [3, 1]), (1, [2]), (3, [2])]), directed: false}")
-// }
+///|
+pub fn Graph::add_node[N, E](self : Graph[N, E], weight? : N) -> NodeIndex {
+  match weight {
+    Some(w) => self.try_add_node?(weight=w).unwrap()
+    None => self.try_add_node?().unwrap()
+  }
+}
 
-// ///|
-// pub fn Graph::dijkstra[T: Hash+Eq](self : Graph[T], start : T) -> @hashmap.T[T, Int] {
-//   ...
-// }
+///| Add a node (also called vertex) with associated data weight to the graph
+pub fn Graph::try_add_node[N, E](self : Graph[N, E], weight? : N) -> NodeIndex! {
+  let node_idx = NodeIndex::new(self.nodes.length())
+  let node= Node::{
+    ix : node_idx,
+    weight: weight,
+    next : (EdgeIndex::end(), EdgeIndex::end())
+  }
+  guard node_idx < NodeIndex::end() else {
+    raise NodeIxLimit("Node index limit reached")
+  }
+  self.nodes.push(node)
+  node_idx
+}
+
+///|
+test "add_node" {
+  let graph = Graph::new()
+  let node_idx = graph.add_node(weight=0)
+  inspect!(node_idx.ix, content="0")
+  let node_idx = graph.add_node()
+  inspect!(node_idx.ix, content="1")
+}
+
+enum Pair[T] {
+  Both(T, T)
+  One(T)
+  None
+}
+
+///|
+fn index_twice[N, E](self : Graph[N, E], a : Int, b : Int) -> Pair[Node[N]] {
+  let nodes = self.nodes
+  if @math.maximum(a, b) >= nodes.length() {
+    return None
+  } else if a == b {
+    return One(nodes[a])
+  } else {
+    return Both(nodes[a], nodes[b])
+  }
+}
+
+///|
+pub fn Graph::add_edge[N, E](self : Graph[N, E], a : NodeIndex, b : NodeIndex, weight? : E) -> EdgeIndex {
+  match weight {
+    Some(w) => self.try_add_edge?(a, b, weight=w).unwrap()
+    None => self.try_add_edge?(a, b).unwrap()
+  }
+}
+
+///| Add an edge from a to b to the graph, with its associated data weight
+pub fn Graph::try_add_edge[N, E](self : Graph[N, E], a : NodeIndex, b : NodeIndex, weight? : E) -> EdgeIndex! {
+  guard a.ix < self.nodes.length() && b.ix < self.nodes.length() else {
+    return panic()
+  }
+  let edge_idx = EdgeIndex::new(self.edges.length(), a, b.ix)
+  let edge = Edge::{
+    ix : edge_idx,
+    weight: weight,
+    next : (EdgeIndex::end(), EdgeIndex::end()),
+    node : (a, b)
+  }
+  match self.index_twice(a.ix, b.ix) {
+    None => {
+      raise NodeOutBounds("Node index out of bounds")
+    }
+    One(ix) => {
+      edge.next = ix.next
+      ix.next = (edge_idx, edge_idx)
+    }
+    Both(ix_a, ix_b) => {
+      edge.next = (ix_a.next.0, ix_b.next.1)
+      ix_a.next = (edge_idx, ix_a.next.1)
+      ix_b.next = (ix_b.next.0, edge_idx)
+    }
+  }
+  self.edges.push(edge)
+  edge_idx
+}
+
+test "add_edge" {
+  let graph = Graph::new()
+  let node_a = graph.add_node(weight=0)
+  let node_b = graph.add_node(weight=1)
+  let edge_idx = graph.add_edge(node_a, node_b, weight=1)
+  inspect!(edge_idx.ix, content="0")
+  inspect!(graph.edges[edge_idx.ix].weight, content="Some(1)")
+  inspect!(graph.nodes[node_a.ix].next.0.ix, content="0")
+  inspect!(graph.nodes[node_b.ix].next.1.ix, content="0")
+}
