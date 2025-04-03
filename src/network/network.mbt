@@ -62,10 +62,10 @@ fn EdgeIndex::new(
 
 ///| Create a new Graph with directed edges.
 pub fn Graph::new[N, E](directed~ : Bool = true) -> Graph[N, E] {
-  Graph::{ nodes: [], edges: [], directed}
+  Graph::{ nodes: [], edges: [], directed }
 }
 
-///|
+///| Add a node (also called vertex) with associated data weight to the graph
 pub fn Graph::add_node[N, E](self : Graph[N, E], weight? : N) -> NodeIndex {
   match weight {
     Some(w) => self.try_add_node?(weight=w).unwrap()
@@ -116,7 +116,22 @@ fn index_twice[N, E](self : Graph[N, E], a : Int, b : Int) -> Pair[Node[N]] {
   }
 }
 
-///|
+///| Add an edge from node `a` to node `b` in the graph, with an optional weight.
+///
+/// Parameters
+///
+/// - `a` : The starting node of the edge, represented as a `NodeIndex`.
+/// - `b` : The ending node of the edge, represented as a `NodeIndex`.
+/// - `weight` : (Optional) The weight of the edge, represented as type `E`.
+///
+/// Returns
+///
+/// - `EdgeIndex` : The index of the newly added edge in the graph.
+///
+/// Example
+/// ```
+/// let edge_idx = graph.add_edge(node_a, node_b, weight=10)
+/// ```
 pub fn Graph::add_edge[N, E](
   self : Graph[N, E],
   a : NodeIndex,
@@ -208,26 +223,52 @@ pub fn edge_count[N, E](self : Graph[N, E]) -> Int {
   self.edges.length()
 }
 
+///|
 pub fn Graph::is_directed[N, E](self : Graph[N, E]) -> Bool {
   self.directed
 }
 
-pub fn index(self: NodeIndex) -> Int {
+///|
+pub fn index(self : NodeIndex) -> Int {
   self.ix
 }
 
-pub fn find_edge[N, E](self: Graph[N, E], a: NodeIndex, b: NodeIndex) -> Option[EdgeIndex] {
+///| Find an edge between two nodes in the graph.
+///
+/// Parameters
+///
+/// - `a` : The starting node of the edge, represented as a `NodeIndex`.
+/// - `b` : The ending node of the edge, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `Option[EdgeIndex]` : The index of the edge if it exists, or `None` if no such edge is found.
+///
+/// Example
+/// ```
+/// let edge_idx = graph.find_edge(node_a, node_b)
+/// ```
+pub fn find_edge[N, E](
+  self : Graph[N, E],
+  a : NodeIndex,
+  b : NodeIndex
+) -> EdgeIndex? {
   if not(self.directed) {
     self.find_edge_undirected(a, b)
   } else {
-    match self.nodes.get(a.index()){
+    match self.nodes.get(a.index()) {
       None => None
       Some(node) => self.find_edge_directed_from_node(node, b)
     }
   }
 }
 
-fn find_edge_directed_from_node[N, E](self: Graph[N, E], node: Node[N], b: NodeIndex) -> Option[EdgeIndex] {
+///|
+fn find_edge_directed_from_node[N, E](
+  self : Graph[N, E],
+  node : Node[N],
+  b : NodeIndex
+) -> EdgeIndex? {
   let mut edix = node.next.0
   while self.edges.get(edix.ix) is Some(edge) {
     if edge.node.1 == b {
@@ -238,7 +279,8 @@ fn find_edge_directed_from_node[N, E](self: Graph[N, E], node: Node[N], b: NodeI
   None
 }
 
-fn Node::next[N](self: Node[N], index : Int) -> EdgeIndex {
+///|
+fn Node::next[N](self : Node[N], index : Int) -> EdgeIndex {
   match index {
     0 => self.next.0
     1 => self.next.1
@@ -246,7 +288,8 @@ fn Node::next[N](self: Node[N], index : Int) -> EdgeIndex {
   }
 }
 
-fn Edge::node[E](self: Edge[E], index : Int) -> NodeIndex {
+///|
+fn Edge::node[E](self : Edge[E], index : Int) -> NodeIndex {
   match index {
     0 => self.node.0
     1 => self.node.1
@@ -254,18 +297,42 @@ fn Edge::node[E](self: Edge[E], index : Int) -> NodeIndex {
   }
 }
 
-pub fn find_edge_undirected[N, E](self: Graph[N, E], a: NodeIndex, b: NodeIndex) -> Option[EdgeIndex] {
-  match self.nodes.get(a.index()){
+///| Find an edge between two nodes in an undirected graph.
+///
+/// Parameters
+///
+/// - `a` : The first node of the edge, represented as a `NodeIndex`.
+/// - `b` : The second node of the edge, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `Option[EdgeIndex]` : The index of the edge if it exists, or `None` if no such edge is found.
+///
+/// Example
+/// ```
+/// let edge_idx = graph.find_edge_undirected(node_a, node_b)
+/// ```
+pub fn find_edge_undirected[N, E](
+  self : Graph[N, E],
+  a : NodeIndex,
+  b : NodeIndex
+) -> EdgeIndex? {
+  match self.nodes.get(a.index()) {
     None => None
     Some(node) => self.find_edge_undirected_from_node(node, b)
   }
 }
 
-fn find_edge_undirected_from_node[N, E](self: Graph[N, E], node: Node[N], b: NodeIndex) -> Option[EdgeIndex] {
-  for i in 0..<2{
+///|
+fn find_edge_undirected_from_node[N, E](
+  self : Graph[N, E],
+  node : Node[N],
+  b : NodeIndex
+) -> EdgeIndex? {
+  for i in 0..<2 {
     let mut edix = node.next(i)
     while self.edges.get(edix.ix) is Some(edge) {
-      if edge.node(1-i) == b {
+      if edge.node(1 - i) == b {
         return Some(edix)
       }
       edix = edge.next.0
@@ -274,6 +341,7 @@ fn find_edge_undirected_from_node[N, E](self: Graph[N, E], node: Node[N], b: Nod
   None
 }
 
+///|
 test "find_edge/directed" {
   let graph = Graph::new()
   let node_a = graph.add_node(weight=0)
@@ -282,11 +350,14 @@ test "find_edge/directed" {
   inspect!(graph.find_edge(node_a, node_b).unwrap().ix, content="0")
 }
 
-
+///|
 test "find_edge/undirected" {
   let graph = Graph::new(directed=false)
   let node_a = graph.add_node(weight=0)
   let node_b = graph.add_node(weight=1)
   let _ = graph.add_edge(node_a, node_b, weight=1)
-  inspect!(graph.find_edge_undirected(node_a, node_b), content="Some({ix: 0, from: {ix: 2147483647}, successor_index: -1})")
+  inspect!(
+    graph.find_edge_undirected(node_a, node_b),
+    content="Some({ix: 0, from: {ix: 2147483647}, successor_index: -1})",
+  )
 }
