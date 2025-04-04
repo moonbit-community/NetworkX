@@ -81,6 +81,14 @@ pub fn Dfs::empty() -> Dfs {
   Dfs::{ stack: [], discovered: VisitMap::new() }
 }
 
+///|
+impl Default for Dfs with default() -> Dfs {
+  Dfs::{
+    stack: [],
+    discovered: VisitMap::new()
+  }
+}
+
 ///| Create a new Depth-First Search (DFS) instance from given parts.
 ///
 /// Parameters
@@ -124,7 +132,7 @@ pub fn Dfs::move_to(self : Dfs, node : NodeIndex) -> Unit {
 /// - `NodeIndex?` : The next node in the DFS traversal if available, or `None` if the traversal is complete.
 ///
 /// Example
-/// ```moonbit
+/// ```
 /// let graph = Graph::new()
 /// let node_a = graph.add_node()
 /// let node_b = graph.add_node()
@@ -132,10 +140,10 @@ pub fn Dfs::move_to(self : Dfs, node : NodeIndex) -> Unit {
 /// graph.add_edge(node_a, node_b) |> ignore
 /// graph.add_edge(node_b, node_c) |> ignore
 /// let mut dfs = Dfs::new(graph, node_a)
-/// inspect!(dfs.next(graph).unwrap(), content=node_a.to_string())
-/// inspect!(dfs.next(graph).unwrap(), content=node_b.to_string())
-/// inspect!(dfs.next(graph).unwrap(), content=node_c.to_string())
-/// inspect!(dfs.next(graph).unwrap(), content=node_d.to_string())
+/// inspect!(dfs.next(graph), content=Some(node_a).to_string())
+/// inspect!(dfs.next(graph), content=Some(node_b).to_string())
+/// inspect!(dfs.next(graph), content=Some(node_c).to_string())
+/// inspect!(dfs.next(graph), content=Some(node_d).to_string())
 /// inspect!(dfs.next(graph), content="None")
 /// ```
 pub fn Dfs::next[N, E](self : Dfs, g : Graph[N, E]) -> NodeIndex? {
@@ -163,10 +171,95 @@ test "Dfs::next" {
   graph.add_edge(node_b, node_c, weight=2) |> ignore
   graph.add_edge(node_c, node_d, weight=3) |> ignore
   let dfs = Dfs::new(graph, node_a)
-  inspect!(dfs.next(graph).unwrap(), content=node_a.to_string())
-  inspect!(dfs.next(graph).unwrap(), content=node_b.to_string())
-  inspect!(dfs.next(graph).unwrap(), content=node_c.to_string())
-  inspect!(dfs.next(graph).unwrap(), content=node_d.to_string())
+  inspect!(dfs.next(graph), content=Some(node_a).to_string())
+  inspect!(dfs.next(graph), content=Some(node_b).to_string())
+  inspect!(dfs.next(graph), content=Some(node_c).to_string())
+  inspect!(dfs.next(graph), content=Some(node_d).to_string())
+  inspect!(dfs.next(graph), content="None")
+  // empty the stack
+  inspect!(dfs.next(graph), content="None")
+}
+
+///|
+struct DfsPostOrder {
+  stack : Array[NodeIndex]
+  discovered : VisitMap
+  finished : VisitMap
+}
+
+impl Default for DfsPostOrder with default() -> DfsPostOrder {
+  DfsPostOrder::{
+    stack: [],
+    discovered: VisitMap::new(),
+    finished: VisitMap::new()
+  }
+}
+///| Create a new Depth-First Search (DFS) Post-Order instance starting from a given node.
+///
+/// Parameters
+///
+/// - `g` : The graph on which the DFS Post-Order will be performed, represented as a `Graph[N, E]`.
+/// - `start` : The starting node for the DFS Post-Order, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `DfsPostOrder` : A new DFS Post-Order instance initialized with the starting node.
+///
+/// Example
+/// ```
+/// let dfs_post = DfsPostOrder::new(graph, node_a)
+/// ```
+pub fn DfsPostOrder::new[N, E](g : Graph[N, E], start : NodeIndex) -> DfsPostOrder {
+  DfsPostOrder::{
+    stack: [start],
+    discovered: VisitMap::new(),
+    finished: VisitMap::new()
+  }
+}
+
+pub fn DfsPostOrder::reset(self : DfsPostOrder) -> Unit {
+  self.stack.clear()
+  self.discovered.visit.clear()
+  self.finished.visit.clear()
+}
+
+pub fn DfsPostOrder::move_to(self : DfsPostOrder, node : NodeIndex) -> Unit {
+  self.stack.clear()
+  self.stack.push(node)
+}
+
+pub fn DfsPostOrder::next[N, E](self : DfsPostOrder, g : Graph[N, E]) -> NodeIndex? {
+  while self.stack.last() is Some(node) {
+    if self.discovered.visit(node) {
+      for succ in g.neighbors(node) {
+        if not(self.discovered.is_visited(succ)) {
+          self.stack.push(succ)
+        }
+      }
+    } else {
+      self.stack.pop() |> ignore
+      if self.finished.visit(node) {
+        return Some(node)
+      }
+    }
+  }
+  None
+}
+
+test "DfsPostOrder::next" {
+  let graph = Graph::new()
+  let node_a = graph.add_node()
+  let node_b = graph.add_node()
+  let node_c = graph.add_node()
+  let node_d = graph.add_node()
+  graph.add_edge(node_a, node_b) |> ignore
+  graph.add_edge(node_b, node_c) |> ignore
+  graph.add_edge(node_c, node_d) |> ignore
+  let dfs = DfsPostOrder::new(graph, node_a)
+  inspect!(dfs.next(graph), content=Some(node_d).to_string())
+  inspect!(dfs.next(graph), content=Some(node_c).to_string())
+  inspect!(dfs.next(graph), content=Some(node_b).to_string())
+  inspect!(dfs.next(graph), content=Some(node_a).to_string())
   inspect!(dfs.next(graph), content="None")
   // empty the stack
   inspect!(dfs.next(graph), content="None")
