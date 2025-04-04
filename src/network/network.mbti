@@ -18,8 +18,16 @@ fn node_count[N, E](Graph[N, E]) -> Int
 // Types and methods
 type Dfs
 impl Dfs {
-  empty() -> Self
+  empty[N, E](Graph[N, E]) -> Self
   from_parts(Array[NodeIndex], VisitMap) -> Self
+  move_to(Self, NodeIndex) -> Unit
+  new[N, E](Graph[N, E], NodeIndex) -> Self
+  next[N, E](Self, Graph[N, E]) -> NodeIndex?
+  reset(Self) -> Unit
+}
+
+type DfsPostOrder
+impl DfsPostOrder {
   move_to(Self, NodeIndex) -> Unit
   new[N, E](Graph[N, E], NodeIndex) -> Self
   next[N, E](Self, Graph[N, E]) -> NodeIndex?
