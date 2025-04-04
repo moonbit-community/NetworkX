@@ -8,7 +8,7 @@ struct Dfs {
 ///
 /// Parameters
 ///
-/// - `g` : The graph on which the DFS will be performed, represented as a `Graph[N, E]`.
+/// - `graph` : The graph on which the DFS will be performed, represented as a `Graph[N, E]`.
 /// - `start` : The starting node for the DFS, represented as a `NodeIndex`.
 ///
 /// Returns
@@ -51,6 +51,7 @@ fn VisitMap::op_get(self : VisitMap, node : NodeIndex) -> Bool {
   self.visit[node.ix]
 }
 
+///|
 fn VisitMap::contain(self : VisitMap, nx : Int) -> Bool {
   self.visit[nx]
 }
@@ -86,26 +87,29 @@ priv trait VM {
   unvisit(Self, NodeIndex) -> Bool
 }
 
+///|
 priv trait Visitable {
   visit_map(Self) -> VisitMap
   reset_map(Self, VisitMap) -> Unit
 }
 
-impl [N,E]Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
-  VisitMap::{
-    visit: Array::make(self.node_count(), false)
-  }
+///|
+impl[N, E] Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
+  VisitMap::{ visit: Array::make(self.node_count(), false) }
 }
 
-impl [N, E]Visitable for Graph[N, E] with reset_map(self, map) -> Unit {
+///|
+impl[N, E] Visitable for Graph[N, E] with reset_map(self, map) -> Unit {
   map.clear()
   map.grow(self.node_count())
 }
 
+///|
 fn VisitMap::clear(self : VisitMap) -> Unit {
   self.clear()
 }
 
+///|
 fn VisitMap::grow(self : VisitMap, n : Int) -> Unit {
   self.visit.resize(n, false)
 }
@@ -117,10 +121,7 @@ pub fn Dfs::empty[N, E](graph : Graph[N, E]) -> Dfs {
 
 ///|
 impl Default for Dfs with default() -> Dfs {
-  Dfs::{
-    stack: [],
-    discovered: VisitMap::default()
-  }
+  Dfs::{ stack: [], discovered: VisitMap::default() }
 }
 
 ///| Create a new Depth-First Search (DFS) instance from given parts.
@@ -159,11 +160,11 @@ pub fn Dfs::move_to(self : Dfs, node : NodeIndex) -> Unit {
 ///
 /// Parameters
 ///
-/// - `g` : The graph on which the DFS is being performed, represented as a `Graph[N, E]`.
+/// - `graph` : The graph on which the DFS is being performed, represented as a `Graph[N, E]`.
 ///
 /// Returns
 ///
-/// - `NodeIndex?` : The next node in the DFS traversal if available, or `None` if the traversal is complete.
+/// - `Option[NodeIndex]` : The next node in the DFS traversal if available, or `None` if the traversal is complete.
 ///
 /// Example
 /// ```
@@ -180,10 +181,10 @@ pub fn Dfs::move_to(self : Dfs, node : NodeIndex) -> Unit {
 /// inspect!(dfs.next(graph), content=Some(node_d).to_string())
 /// inspect!(dfs.next(graph), content="None")
 /// ```
-pub fn Dfs::next[N, E](self : Dfs, g : Graph[N, E]) -> NodeIndex? {
+pub fn Dfs::next[N, E](self : Dfs, graph : Graph[N, E]) -> NodeIndex? {
   while self.stack.pop() is Some(node) {
     if self.discovered.visit(node) {
-      for succ in g.neighbors(node) {
+      for succ in graph.neighbors(node) {
         if not(self.discovered.is_visited(succ)) {
           self.stack.push(succ)
         }
@@ -221,24 +222,25 @@ struct DfsPostOrder {
   finished : VisitMap
 }
 
+///|
 impl Default for VisitMap with default() -> VisitMap {
-  VisitMap::{
-    visit: Array::new()
-  }
+  VisitMap::{ visit: Array::new() }
 }
 
+///|
 impl Default for DfsPostOrder with default() -> DfsPostOrder {
   DfsPostOrder::{
     stack: [],
     discovered: VisitMap::default(),
-    finished: VisitMap::default()
+    finished: VisitMap::default(),
   }
 }
+
 ///| Create a new Depth-First Search (DFS) Post-Order instance starting from a given node.
 ///
 /// Parameters
 ///
-/// - `g` : The graph on which the DFS Post-Order will be performed, represented as a `Graph[N, E]`.
+/// - `graph` : The graph on which the DFS Post-Order will be performed, represented as a `Graph[N, E]`.
 /// - `start` : The starting node for the DFS Post-Order, represented as a `NodeIndex`.
 ///
 /// Returns
@@ -249,29 +251,62 @@ impl Default for DfsPostOrder with default() -> DfsPostOrder {
 /// ```
 /// let dfs_post = DfsPostOrder::new(graph, node_a)
 /// ```
-pub fn DfsPostOrder::new[N, E](graph : Graph[N, E], start : NodeIndex) -> DfsPostOrder {
+pub fn DfsPostOrder::new[N, E](
+  graph : Graph[N, E],
+  start : NodeIndex
+) -> DfsPostOrder {
   DfsPostOrder::{
     stack: [start],
     discovered: graph.visit_map(),
-    finished: graph.visit_map()
+    finished: graph.visit_map(),
   }
 }
 
+///| reset the DfsPostOrder
 pub fn DfsPostOrder::reset(self : DfsPostOrder) -> Unit {
   self.stack.clear()
   self.discovered.visit.clear()
   self.finished.visit.clear()
 }
 
+///| Keep the discovered map, but clear the visit stack and
+/// restart the dfs from a particular node.
 pub fn DfsPostOrder::move_to(self : DfsPostOrder, node : NodeIndex) -> Unit {
   self.stack.clear()
   self.stack.push(node)
 }
 
-pub fn DfsPostOrder::next[N, E](self : DfsPostOrder, g : Graph[N, E]) -> NodeIndex? {
+///| Perform the next step in the Depth-First Search (DFS) Post-Order traversal.
+///
+/// Parameters
+///
+/// - `graph` : The graph on which the DFS Post-Order is being performed, represented as a `Graph[N, E]`.
+///
+/// Returns
+///
+/// - `Option[NodeIndex]` : The next node in the DFS Post-Order traversal if available, or `None` if the traversal is complete.
+///
+/// Example
+/// ```
+/// let graph = Graph::new()
+/// let node_a = graph.add_node()
+/// let node_b = graph.add_node()
+/// let node_c = graph.add_node()
+/// graph.add_edge(node_a, node_b) |> ignore
+/// graph.add_edge(node_b, node_c) |> ignore
+/// let mut dfs_post = DfsPostOrder::new(graph, node_a)
+/// inspect!(dfs_post.next(graph), content=Some(node_c).to_string())
+/// inspect!(dfs_post.next(graph), content=Some(node_b).to_string())
+/// inspect!(dfs_post.next(graph), content=Some(node_a).to_string())
+/// inspect!(dfs_post.next(graph), content="None")
+/// ```
+pub fn DfsPostOrder::next[N, E](
+  self : DfsPostOrder,
+  graph : Graph[N, E]
+) -> NodeIndex? {
   while self.stack.last() is Some(node) {
     if self.discovered.visit(node) {
-      for succ in g.neighbors(node) {
+      for succ in graph.neighbors(node) {
         if not(self.discovered.is_visited(succ)) {
           self.stack.push(succ)
         }
@@ -286,6 +321,7 @@ pub fn DfsPostOrder::next[N, E](self : DfsPostOrder, g : Graph[N, E]) -> NodeInd
   None
 }
 
+///|
 test "DfsPostOrder::next" {
   let graph = Graph::new()
   let node_a = graph.add_node(weight=1)
