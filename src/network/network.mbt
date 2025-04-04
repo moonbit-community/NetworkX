@@ -8,14 +8,14 @@ struct EdgeIndex {
   ix : Int
   from : NodeIndex
   successor_index : Int
-} derive(Show)
+} derive(Show, Eq, Hash)
 
 ///|
-priv struct Node[N] {
+struct Node[N] {
   ix : NodeIndex
   weight : N?
   mut next : (EdgeIndex, EdgeIndex)
-} derive(Show)
+} derive(Show, Eq, Hash)
 
 ///|
 priv struct Edge[E] {
@@ -23,7 +23,7 @@ priv struct Edge[E] {
   weight : E?
   mut next : (EdgeIndex, EdgeIndex)
   node : (NodeIndex, NodeIndex)
-} derive(Show)
+} derive(Show, Eq, Hash)
 
 ///|
 struct Graph[N, E] {
