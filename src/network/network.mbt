@@ -362,7 +362,20 @@ test "find_edge/undirected" {
   )
 }
 
-///|
+///| Get all neighbors of a given node in the graph.
+///
+/// Parameters
+///
+/// - `node` : The node for which neighbors are to be retrieved, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `Iter[NodeIndex]` : An iterator over the indices of the neighboring nodes.
+///
+/// Example
+/// ```
+/// let neighbors = graph.neighbors(node_a)
+/// ```
 pub fn Graph::neighbors[N, E](
   self : Graph[N, E],
   node : NodeIndex
