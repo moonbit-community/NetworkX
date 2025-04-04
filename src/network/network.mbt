@@ -362,8 +362,12 @@ test "find_edge/undirected" {
   )
 }
 
-fn Graph::neighbors[N, E](self : Graph[N, E], node : NodeIndex) -> Iter[NodeIndex] {
-  let mut res: Iter[NodeIndex] = Iter::empty()
+///|
+pub fn Graph::neighbors[N, E](
+  self : Graph[N, E],
+  node : NodeIndex
+) -> Iter[NodeIndex] {
+  let mut res : Iter[NodeIndex] = Iter::empty()
   let mut edix = self.nodes[node.index()].next.0
   while self.edges.get(edix.ix) is Some(edge) {
     res = res.append(edge.node.1)
@@ -372,6 +376,7 @@ fn Graph::neighbors[N, E](self : Graph[N, E], node : NodeIndex) -> Iter[NodeInde
   res
 }
 
+///|
 test "neighbors" {
   let graph = Graph::new()
   let node_a = graph.add_node()

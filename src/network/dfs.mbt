@@ -66,10 +66,7 @@ pub fn Dfs::empty() -> Dfs {
 }
 
 ///|
-pub fn Dfs::from_parts(
-  stack : Array[NodeIndex],
-  discovered : VisitMap
-) -> Dfs {
+pub fn Dfs::from_parts(stack : Array[NodeIndex], discovered : VisitMap) -> Dfs {
   Dfs::{ stack, discovered }
 }
 
@@ -101,6 +98,7 @@ pub fn Dfs::next[N, E](self : Dfs, g : Graph[N, E]) -> NodeIndex? {
   None
 }
 
+///|
 test "Dfs::next" {
   let graph = Graph::new()
   let node_a = graph.add_node()
