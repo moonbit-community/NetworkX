@@ -1,4 +1,4 @@
-# smallbearrr/NetworkX
+# NetworkX
 
 ## Introduction
 This is a Moonbit-based graph library supporting graph editing, traversal, and shortest path algorithms.
@@ -9,6 +9,49 @@ This is a Moonbit-based graph library supporting graph editing, traversal, and s
 - Support custom weights for nodes and edges
 
 ## Usage
+### Graph
+Create a graph:
+```moonbit
+// Create a directed graph
+let graph = Graph::new()
+// Create an undirected graph
+let graph = Graph::new(directed=false)
+```
+
+Add nodes:
+```moonbit
+// weight is optional
+let node_a = graph.add_node(weight=1)
+```
+
+Add edges:
+```moonbit
+// weight is optional
+let edge = graph.add_edge(node_a, node_b, weight=2)
+```
+
+### DFS
+
+Create a DFS object:
+```moonbit
+let dfs = DFS::new(graph)
+```
+
+Create a PostOrder DFS object:
+```moonbit
+let post_dfs = PostOrderDFS::new(graph)
+```
+
+Get the next node in the DFS traversal:
+```moonbit
+let next_node = dfs.next()
+```
+
+### Dijkstra
+Find the shortest path using Dijkstra's algorithm:
+```moonbit
+let dijkstra = graph.dijkstra(start_node, 0)
+```
 
 ## Contributing
 Issues and pull requests are welcome. Please make sure to run all tests before submitting.
