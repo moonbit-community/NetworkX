@@ -21,7 +21,7 @@ struct Dfs {
 /// let node_a = graph.add_node()
 /// let dfs = Dfs::new(graph, node_a)
 /// ```
-pub fn Dfs::new(graph : Graph[N, E], start : NodeIndex) -> Dfs {
+pub fn Dfs::new[N, E](graph : Graph[N, E], start : NodeIndex) -> Dfs {
   Dfs::{ stack: [start], discovered: graph.visit_map() }
 }
 
@@ -91,16 +91,13 @@ priv trait Visitable {
   reset_map(Self, VisitMap) -> Unit
 }
 
-type N
-type E
-
-impl Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
+impl [N,E]Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
   VisitMap::{
     visit: Array::make(self.node_count(), false)
   }
 }
 
-impl Visitable for Graph[N, E] with reset_map(self, map) -> Unit {
+impl [N, E]Visitable for Graph[N, E] with reset_map(self, map) -> Unit {
   map.clear()
   map.grow(self.node_count())
 }
@@ -114,7 +111,7 @@ fn VisitMap::grow(self : VisitMap, n : Int) -> Unit {
 }
 
 ///| create an empty Dfs
-pub fn Dfs::empty(graph : Graph[N, E]) -> Dfs {
+pub fn Dfs::empty[N, E](graph : Graph[N, E]) -> Dfs {
   Dfs::{ stack: [], discovered: graph.visit_map() }
 }
 
@@ -252,7 +249,7 @@ impl Default for DfsPostOrder with default() -> DfsPostOrder {
 /// ```
 /// let dfs_post = DfsPostOrder::new(graph, node_a)
 /// ```
-pub fn DfsPostOrder::new(graph : Graph[N, E], start : NodeIndex) -> DfsPostOrder {
+pub fn DfsPostOrder::new[N, E](graph : Graph[N, E], start : NodeIndex) -> DfsPostOrder {
   DfsPostOrder::{
     stack: [start],
     discovered: graph.visit_map(),
@@ -291,11 +288,11 @@ pub fn DfsPostOrder::next[N, E](self : DfsPostOrder, g : Graph[N, E]) -> NodeInd
 
 test "DfsPostOrder::next" {
   let graph = Graph::new()
-  let node_a = graph.add_node()
+  let node_a = graph.add_node(weight=1)
   let node_b = graph.add_node()
   let node_c = graph.add_node()
   let node_d = graph.add_node()
-  graph.add_edge(node_a, node_b) |> ignore
+  graph.add_edge(node_a, node_b, weight=1) |> ignore
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let dfs = DfsPostOrder::new(graph, node_a)
