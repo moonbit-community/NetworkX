@@ -21,49 +21,59 @@ struct Dfs {
 /// let node_a = graph.add_node()
 /// let dfs = Dfs::new(graph, node_a)
 /// ```
-pub fn Dfs::new[N, E](g : Graph[N, E], start : NodeIndex) -> Dfs {
-  Dfs::{ stack: [start], discovered: VisitMap::new() }
+pub fn Dfs::new(graph : Graph[N, E], start : NodeIndex) -> Dfs {
+  Dfs::{ stack: [start], discovered: graph.visit_map() }
 }
 
 ///|
 struct VisitMap {
-  visit : @hashmap.T[NodeIndex, Bool]
+  // visit : @hashmap.T[NodeIndex, Bool]
+  visit : Array[Bool]
 }
 
 ///| create a new VisitMap
 pub fn VisitMap::new() -> VisitMap {
-  VisitMap::{ visit: @hashmap.new() }
+  // VisitMap::{ visit: @hashmap.new() }
+  VisitMap::{ visit: Array::new() }
 }
 
 ///|
 fn VisitMap::op_set(self : VisitMap, node : NodeIndex, count : Bool) -> Unit {
-  self.visit[node] = count
+  self.visit[node.ix] = count
 }
 
 ///|
 fn VisitMap::op_get(self : VisitMap, node : NodeIndex) -> Bool {
-  match self.visit.get(node) {
-    Some(t) => t
-    None => false
-  }
+  // match self.visit.get(node) {
+  //   Some(t) => t
+  //   None => false
+  // }
+  self.visit[node.ix]
+}
+
+fn VisitMap::contain(self : VisitMap, nx : Int) -> Bool {
+  self.visit[nx]
 }
 
 ///|
 impl VM for VisitMap with visit(self, node : NodeIndex) -> Bool {
-  let res = self.visit.contains(node) && self.visit[node].unwrap()
-  self.visit[node] = true
+  let nx = node.ix
+  let res = self.contain(nx)
+  self.visit[nx] = true
   not(res)
 }
 
 ///|
 impl VM for VisitMap with is_visited(self, node : NodeIndex) -> Bool {
-  self.visit.contains(node)
+  // self.visit.contains(node)
+  self.contain(node.ix)
 }
 
 ///|
 impl VM for VisitMap with unvisit(self, node : NodeIndex) -> Bool {
   if self.is_visited(node) {
-    self.visit[node] = not(self.visit[node].unwrap())
+    // self.visit[node] = not(self.visit[node].unwrap())
+    self.visit[node.ix] = not(self.visit[node.ix])
     return true
   }
   false
@@ -76,16 +86,43 @@ priv trait VM {
   unvisit(Self, NodeIndex) -> Bool
 }
 
+priv trait Visitable {
+  visit_map(Self) -> VisitMap
+  reset_map(Self, VisitMap) -> Unit
+}
+
+type N
+type E
+
+impl Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
+  VisitMap::{
+    visit: Array::make(self.node_count(), false)
+  }
+}
+
+impl Visitable for Graph[N, E] with reset_map(self, map) -> Unit {
+  map.clear()
+  map.grow(self.node_count())
+}
+
+fn VisitMap::clear(self : VisitMap) -> Unit {
+  self.clear()
+}
+
+fn VisitMap::grow(self : VisitMap, n : Int) -> Unit {
+  self.visit.resize(n, false)
+}
+
 ///| create an empty Dfs
-pub fn Dfs::empty() -> Dfs {
-  Dfs::{ stack: [], discovered: VisitMap::new() }
+pub fn Dfs::empty(graph : Graph[N, E]) -> Dfs {
+  Dfs::{ stack: [], discovered: graph.visit_map() }
 }
 
 ///|
 impl Default for Dfs with default() -> Dfs {
   Dfs::{
     stack: [],
-    discovered: VisitMap::new()
+    discovered: VisitMap::default()
   }
 }
 
@@ -167,9 +204,9 @@ test "Dfs::next" {
   let node_b = graph.add_node()
   let node_c = graph.add_node()
   let node_d = graph.add_node()
-  graph.add_edge(node_a, node_b, weight=1) |> ignore
-  graph.add_edge(node_b, node_c, weight=2) |> ignore
-  graph.add_edge(node_c, node_d, weight=3) |> ignore
+  graph.add_edge(node_a, node_b) |> ignore
+  graph.add_edge(node_b, node_c) |> ignore
+  graph.add_edge(node_c, node_d) |> ignore
   let dfs = Dfs::new(graph, node_a)
   inspect!(dfs.next(graph), content=Some(node_a).to_string())
   inspect!(dfs.next(graph), content=Some(node_b).to_string())
@@ -187,11 +224,17 @@ struct DfsPostOrder {
   finished : VisitMap
 }
 
+impl Default for VisitMap with default() -> VisitMap {
+  VisitMap::{
+    visit: Array::new()
+  }
+}
+
 impl Default for DfsPostOrder with default() -> DfsPostOrder {
   DfsPostOrder::{
     stack: [],
-    discovered: VisitMap::new(),
-    finished: VisitMap::new()
+    discovered: VisitMap::default(),
+    finished: VisitMap::default()
   }
 }
 ///| Create a new Depth-First Search (DFS) Post-Order instance starting from a given node.
@@ -209,11 +252,11 @@ impl Default for DfsPostOrder with default() -> DfsPostOrder {
 /// ```
 /// let dfs_post = DfsPostOrder::new(graph, node_a)
 /// ```
-pub fn DfsPostOrder::new[N, E](g : Graph[N, E], start : NodeIndex) -> DfsPostOrder {
+pub fn DfsPostOrder::new(graph : Graph[N, E], start : NodeIndex) -> DfsPostOrder {
   DfsPostOrder::{
     stack: [start],
-    discovered: VisitMap::new(),
-    finished: VisitMap::new()
+    discovered: graph.visit_map(),
+    finished: graph.visit_map()
   }
 }
 
