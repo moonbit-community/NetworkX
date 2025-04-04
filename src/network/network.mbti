@@ -1,5 +1,9 @@
 package "smallbearrr/NetworkX/network"
 
+import(
+  "moonbitlang/core/hashmap"
+)
+
 // Values
 fn edge_count[N, E](Graph[N, E]) -> Int
 
@@ -12,17 +16,31 @@ fn index(NodeIndex) -> Int
 fn node_count[N, E](Graph[N, E]) -> Int
 
 // Types and methods
+type Dfs
+impl Dfs {
+  empty() -> Self
+  from_parts(Array[NodeIndex], VisitMap) -> Self
+  move_to(Self, NodeIndex) -> Unit
+  new[N, E](Graph[N, E], NodeIndex) -> Self
+  next[N, E](Self, Graph[N, E]) -> NodeIndex?
+  reset(Self) -> Unit
+}
+
 type EdgeIndex
+impl Eq for EdgeIndex
+impl Hash for EdgeIndex
 impl Show for EdgeIndex
 
 type Graph[N, E]
 impl Graph {
   add_edge[N, E](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex
   add_node[N, E](Self[N, E], weight? : N) -> NodeIndex
+  dijkstra[N, E : Eq + Compare + Add + Sub](Self[N, E], NodeIndex, E) -> @hashmap.T[NodeIndex, E]!
   edge_count[N, E](Self[N, E]) -> Int
   find_edge[N, E](Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
   find_edge_undirected[N, E](Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
   is_directed[N, E](Self[N, E]) -> Bool
+  neighbors[N, E](Self[N, E], NodeIndex) -> Iter[NodeIndex]
   new[N, E](directed~ : Bool = ..) -> Self[N, E]
   node_count[N, E](Self[N, E]) -> Int
   try_add_edge[N, E](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex!
@@ -36,7 +54,13 @@ impl NodeIndex {
 }
 impl Compare for NodeIndex
 impl Eq for NodeIndex
+impl Hash for NodeIndex
 impl Show for NodeIndex
+
+type VisitMap
+impl VisitMap {
+  new() -> Self
+}
 
 // Type aliases
 
