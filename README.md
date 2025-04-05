@@ -57,7 +57,7 @@ let next_node = dfs.next()
 ### Dijkstra
 Find the shortest path using Dijkstra's algorithm:
 ```moonbit
-let dijkstra = graph.dijkstra(start_node, 0)
+let dijkstra = graph.dijkstra(start_node)
 ```
 
 ## Contributing

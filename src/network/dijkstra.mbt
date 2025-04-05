@@ -3,7 +3,6 @@
 /// Parameters
 ///
 /// - `a` : The starting node, represented as a `NodeIndex`.
-/// - `offset` : The initial distance offset, represented as type `E`(edge weight).
 ///
 /// Returns
 ///
@@ -11,7 +10,7 @@
 ///
 /// Example
 /// ```
-/// let dist = graph.dijkstra!(node_start, 0)
+/// let dist = graph.dijkstra!(node_start)
 /// ```
 pub fn Graph::dijkstra[N, E : Eq + Compare + Add + Sub + Default](
   self : Graph[N, E],
