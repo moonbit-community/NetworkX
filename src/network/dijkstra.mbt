@@ -13,10 +13,9 @@
 /// ```
 /// let dist = graph.dijkstra!(node_start, 0)
 /// ```
-pub fn Graph::dijkstra[N, E : Eq + Compare + Add + Sub](
+pub fn Graph::dijkstra[N, E : Eq + Compare + Add + Sub + Default](
   self : Graph[N, E],
-  a : NodeIndex,
-  offset : E
+  a : NodeIndex
 ) -> @hashmap.T[NodeIndex, E]! {
   guard self.nodes.get(a.index()) is Some(_) else {
     raise NodeNotFound("Node not found")
@@ -25,7 +24,7 @@ pub fn Graph::dijkstra[N, E : Eq + Compare + Add + Sub](
   let vis = Array::make(nodes_count, false)
   let dist = @hashmap.new()
   let q : @priority_queue.T[(E, NodeIndex)] = @priority_queue.new()
-  q.push((offset, a))
+  q.push((E::default(), a))
   while not(q.is_empty()) {
     let (d, u) = q.pop().unwrap()
     if vis[u.index()] {
@@ -41,7 +40,7 @@ pub fn Graph::dijkstra[N, E : Eq + Compare + Add + Sub](
       }
       let new_dist = match edge.weight {
         None => d
-        Some(w) => d + w - offset
+        Some(w) => d + w - E::default()
       }
       if dist.get(v) == None || new_dist <= dist[v].unwrap() {
         dist[v] = new_dist
@@ -61,7 +60,7 @@ test "dijkstra/Int" {
   let node_c = graph.add_node()
   graph.add_edge(node_a, node_b, weight=1) |> ignore
   graph.add_edge(node_b, node_c, weight=2) |> ignore
-  let dist = graph.dijkstra!(node_a, 0)
+  let dist = graph.dijkstra!(node_a)
   inspect!(dist[node_b].unwrap(), content="1")
   inspect!(dist[node_c].unwrap(), content="3")
 }
@@ -75,7 +74,7 @@ test "dijkstra/Float" {
   graph.add_edge(node_a, node_b, weight=1.0) |> ignore
   graph.add_edge(node_b, node_c, weight=2.0) |> ignore
   graph.add_edge(node_a, node_c, weight=2.5) |> ignore
-  let dist = graph.dijkstra!(node_a, 0.0)
+  let dist = graph.dijkstra!(node_a)
   inspect!(dist[node_b].unwrap(), content="1")
   inspect!(dist[node_c].unwrap(), content="2.5")
 }
