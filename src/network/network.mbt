@@ -18,7 +18,7 @@ priv struct Node[N] {
 } derive(Show, Eq, Hash)
 
 ///|
-priv struct Edge[E] {
+struct Edge[E] {
   ix : EdgeIndex
   weight : E
   mut next : (EdgeIndex, EdgeIndex)
@@ -239,6 +239,38 @@ pub fn index(self : NodeIndex) -> Int {
   self.ix
 }
 
+///|
+pub fn Graph::capacity[N, E](self : Graph[N, E]) -> (Int, Int) {
+  (self.nodes.capacity(), self.edges.capacity())
+}
+
+///|
+pub fn Graph::edges[N, E: Eq + Hash](self : Graph[N, E], node : NodeIndex) -> Iter[Edge[E]] {
+  let edges = @hashset.new()
+  for i in 0..<(2-self.directed.to_int()) {
+    let mut edix = self.nodes[node.index()].next(i)
+    while self.edges.get(edix.ix) is Some(edge) {
+      edges.add(edge)
+      edix = edge.next(i)
+    }
+  }
+  edges.iter()
+}
+
+///|
+test "edges" {
+  let graph = Graph::new(directed=false)
+  let node_a = graph.add_node()
+  let node_b = graph.add_node()
+  let node_c = graph.add_node()
+  graph.add_edge(node_b, node_a) |> ignore
+  graph.add_edge(node_c, node_a) |> ignore
+  let edges = graph.edges(node_a)
+  inspect!(edges.count(), content="2")
+  inspect!(edges.contains(graph.edges[0]), content="true")
+  inspect!(edges.contains(graph.edges[1]), content="true")
+}
+
 ///| Find an edge between two nodes in the graph.
 ///
 /// Parameters
@@ -295,6 +327,15 @@ fn Node::next[N](self : Node[N], index : Int) -> EdgeIndex {
 }
 
 ///|
+fn Edge::next[E](self : Edge[E], index : Int) -> EdgeIndex {
+  match index {
+    0 => self.next.0
+    1 => self.next.1
+    _ => abort("Edge next get error")
+  }
+}
+
+///|
 fn Edge::node[E](self : Edge[E], index : Int) -> NodeIndex {
   match index {
     0 => self.node.0
@@ -341,7 +382,7 @@ fn find_edge_undirected_from_node[N, E](
       if edge.node(1 - i) == b {
         return Some(edix)
       }
-      edix = edge.next.0
+      edix = edge.next(i)
     }
   }
   None
