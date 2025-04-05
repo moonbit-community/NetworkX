@@ -38,10 +38,7 @@ pub fn Graph::dijkstra[N, E : Eq + Compare + Add + Sub + Default](
         edix = edge.next.0
         continue
       }
-      let new_dist = match edge.weight {
-        None => d
-        Some(w) => d + w - E::default()
-      }
+      let new_dist = d + edge.weight
       if dist.get(v) == None || new_dist <= dist[v].unwrap() {
         dist[v] = new_dist
         q.push((new_dist, v))

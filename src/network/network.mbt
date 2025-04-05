@@ -13,14 +13,14 @@ struct EdgeIndex {
 ///|
 priv struct Node[N] {
   ix : NodeIndex
-  weight : N?
+  weight : N
   mut next : (EdgeIndex, EdgeIndex)
 } derive(Show, Eq, Hash)
 
 ///|
 priv struct Edge[E] {
   ix : EdgeIndex
-  weight : E?
+  weight : E
   mut next : (EdgeIndex, EdgeIndex)
   node : (NodeIndex, NodeIndex)
 } derive(Show, Eq, Hash)
@@ -66,7 +66,7 @@ pub fn Graph::new[N, E](directed~ : Bool = true) -> Graph[N, E] {
 }
 
 ///| Add a node (also called vertex) with associated data weight to the graph
-pub fn Graph::add_node[N, E](self : Graph[N, E], weight? : N) -> NodeIndex {
+pub fn Graph::add_node[N: Default, E](self : Graph[N, E], weight? : N) -> NodeIndex {
   match weight {
     Some(w) => self.try_add_node?(weight=w).unwrap()
     None => self.try_add_node?().unwrap()
@@ -74,11 +74,11 @@ pub fn Graph::add_node[N, E](self : Graph[N, E], weight? : N) -> NodeIndex {
 }
 
 ///| Add a node (also called vertex) with associated data weight to the graph
-pub fn Graph::try_add_node[N, E](self : Graph[N, E], weight? : N) -> NodeIndex! {
+pub fn Graph::try_add_node[N: Default, E](self : Graph[N, E], weight? : N) -> NodeIndex! {
   let node_idx = NodeIndex::new(self.nodes.length())
   let node = Node::{
     ix: node_idx,
-    weight,
+    weight: weight.or(N::default()),
     next: (EdgeIndex::end(), EdgeIndex::end()),
   }
   guard node_idx < NodeIndex::end() else {
@@ -132,7 +132,7 @@ fn index_twice[N, E](self : Graph[N, E], a : Int, b : Int) -> Pair[Node[N]] {
 /// ```
 /// let edge_idx = graph.add_edge(node_a, node_b, weight=10)
 /// ```
-pub fn Graph::add_edge[N, E](
+pub fn Graph::add_edge[N, E: Default](
   self : Graph[N, E],
   a : NodeIndex,
   b : NodeIndex,
@@ -145,7 +145,7 @@ pub fn Graph::add_edge[N, E](
 }
 
 ///| Add an edge from a to b to the graph, with its associated data weight
-pub fn Graph::try_add_edge[N, E](
+pub fn Graph::try_add_edge[N, E: Default](
   self : Graph[N, E],
   a : NodeIndex,
   b : NodeIndex,
@@ -154,7 +154,7 @@ pub fn Graph::try_add_edge[N, E](
   let edge_idx = EdgeIndex::new(self.edges.length(), NodeIndex::end(), -1)
   let edge = Edge::{
     ix: edge_idx,
-    weight,
+    weight: weight.or(E::default()),
     next: (EdgeIndex::end(), EdgeIndex::end()),
     node: (a, b),
   }
@@ -402,3 +402,12 @@ test "neighbors" {
   inspect!(nb.contains(node_b), content="true")
   inspect!(nb.contains(node_c), content="true")
 }
+
+///|
+pub fn Graph::from_edges[N, E: Default](iters : Iter[(N, N)]) -> Graph[N, E] {
+  for iter in iters {
+    
+  }
+  ...
+}
+
