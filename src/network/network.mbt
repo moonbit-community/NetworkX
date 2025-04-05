@@ -239,12 +239,25 @@ pub fn index(self : NodeIndex) -> Int {
   self.ix
 }
 
-///|
+///| return the capacity of the graph (nodes and edges)
 pub fn Graph::capacity[N, E](self : Graph[N, E]) -> (Int, Int) {
   (self.nodes.capacity(), self.edges.capacity())
 }
 
-///|
+///| Retrieve all edges connected to a given node in the graph.
+///
+/// Parameters
+///
+/// - `node` : The node for which edges are to be retrieved, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `Iter[Edge[E]]` : An iterator over the edges connected to the given node.
+///
+/// Example
+/// ```
+/// let edges = graph.edges(node_a)
+/// ```
 pub fn Graph::edges[N, E: Eq + Hash](self : Graph[N, E], node : NodeIndex) -> Iter[Edge[E]] {
   let edges = @hashset.new()
   for i in 0..<(2-self.directed.to_int()) {
@@ -450,7 +463,22 @@ test "neighbors" {
   inspect!(nb.contains(node_c), content="true")
 }
 
-///|
+///| Create a new graph with specified capacities for nodes and edges.
+///
+/// Parameters
+///
+/// - `nodes_capacity` : The initial capacity for the nodes array.
+/// - `edges_capacity` : The initial capacity for the edges array.
+/// - `directed~` : WWhether the graph is directed. Defaults to `true`.
+///
+/// Returns
+///
+/// - `Graph[N, E]` : A new graph instance with the specified capacities.
+///
+/// Example
+/// ```
+/// let graph = Graph::with_capacity(10, 10, directed=false)
+/// ```
 pub fn Graph::with_capacity[N, E](
   nodes_capacity : Int,
   edges_capacity : Int,
@@ -463,12 +491,30 @@ pub fn Graph::with_capacity[N, E](
   }
 }
 
-///|
+///| Extend the graph by adding edges from an iterable of node pairs.
+///  (N, N) is weighted of node pairs, the same weight are considered the same point!
+///
+/// Parameters
+///
+/// - `iterable` : An iterator over pairs of nodes `(N, N)` to be added as edges.
+///
+/// Returns
+///
+/// - `Unit` : This function modifies the graph in place.
+///
+/// Example
+/// ```
+/// let edges = [(1, 2), (2, 3)]
+/// graph.extend_with_edges(edges.iter())
+/// ```
 pub fn Graph::extend_with_edges[N : Default + Eq + Hash, E : Default](
   self : Graph[N, E],
   iterable : Iter[(N, N)]
 ) -> Unit {
   let mp : @hashmap.T[N, NodeIndex] = @hashmap.new()
+  for node in self.nodes {
+    mp[node.weight] = node.ix
+  }
   for elt in iterable {
     let (a, b) = elt
     let a_idx = mp.get_or_init(a, fn() {
@@ -485,7 +531,22 @@ pub fn Graph::extend_with_edges[N : Default + Eq + Hash, E : Default](
   }
 }
 
-///|
+///| Create a new graph from an iterable of node pairs.
+///  (N, N) is weighted of node pairs, the same weight are considered the same point!
+///
+/// Parameters
+///
+/// - `iters` : An iterator over pairs of nodes `(N, N)` to be added as edges.
+/// - `directed~` : Whether the graph is directed. Defaults to `true`.
+///
+/// Returns
+///
+/// - `Graph[N, E]` : A new graph instance with the specified edges.
+///
+/// Example
+/// ```
+/// let graph = Graph::from_edges([(1, 2), (2, 3)].iter())
+/// ```
 pub fn Graph::from_edges[N : Default + Eq + Hash, E : Default](
   iters : Iter[(N, N)],
   directed~ : Bool = true
@@ -506,7 +567,22 @@ test "from_edges" {
   )
 }
 
-///|
+///| Extend the graph by adding edges with weights from an iterable of node triples.
+///  `N` is weighted of node pairs, the same weight are considered the same point!
+///
+/// Parameters
+///
+/// - `iterable` : An iterator over triples `(N, N, E)` where `N` represents nodes and `E` represents edge weights.
+///
+/// Returns
+///
+/// - `Unit` : This function modifies the graph in place.
+///
+/// Example
+/// ```
+/// let edges = [(1, 2, 10), (2, 3, 20)]
+/// graph.extend_with_edges_with_weights(edges.iter())
+/// ```
 pub fn Graph::extend_with_edges_with_weights[N : Default + Eq + Hash, E : Default](
   self : Graph[N, E],
   iterable : Iter[(N, N, E)]
@@ -528,7 +604,22 @@ pub fn Graph::extend_with_edges_with_weights[N : Default + Eq + Hash, E : Defaul
   }
 }
 
-///|
+///| Create a new graph from an iterable of node triples with weights.
+///  `N` is weighted of node pairs, the same weight are considered the same point!
+///
+/// Parameters
+///
+/// - `iters` : An iterator over triples `(N, N, E)` where `N` represents nodes and `E` represents edge weights.
+/// - `directed~` : Whether the graph is directed. Defaults to `true`.
+///
+/// Returns
+///
+/// - `Graph[N, E]` : A new graph instance with the specified edges and weights.
+///
+/// Example
+/// ```
+/// let graph = Graph::from_edges_with_weights([(1, 2, 10), (2, 3, 20)].iter(), directed=false)
+/// ```
 pub fn Graph::from_edges_with_weights[N : Default + Eq + Hash, E : Default](
   iters : Iter[(N, N, E)],
   directed~ : Bool = true
