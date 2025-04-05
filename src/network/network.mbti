@@ -34,6 +34,11 @@ impl DfsPostOrder {
   reset(Self) -> Unit
 }
 
+type Edge[E]
+impl[E : Eq] Eq for Edge[E]
+impl[E : Hash] Hash for Edge[E]
+impl[E : Show] Show for Edge[E]
+
 type EdgeIndex
 impl Eq for EdgeIndex
 impl Hash for EdgeIndex
@@ -41,18 +46,25 @@ impl Show for EdgeIndex
 
 type Graph[N, E]
 impl Graph {
-  add_edge[N, E](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex
-  add_node[N, E](Self[N, E], weight? : N) -> NodeIndex
-  dijkstra[N, E : Eq + Compare + Add + Sub](Self[N, E], NodeIndex, E) -> @hashmap.T[NodeIndex, E]!
+  add_edge[N, E : Default](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex
+  add_node[N : Default, E](Self[N, E], weight? : N) -> NodeIndex
+  capacity[N, E](Self[N, E]) -> (Int, Int)
+  dijkstra[N, E : Eq + Compare + Add + Sub + Default](Self[N, E], NodeIndex) -> @hashmap.T[NodeIndex, E]!
   edge_count[N, E](Self[N, E]) -> Int
+  edges[N, E : Eq + Hash](Self[N, E], NodeIndex) -> Iter[Edge[E]]
+  extend_with_edges[N : Default + Eq + Hash, E : Default](Self[N, E], Iter[(N, N)]) -> Unit
+  extend_with_edges_with_weights[N : Default + Eq + Hash, E : Default](Self[N, E], Iter[(N, N, E)]) -> Unit
   find_edge[N, E](Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
   find_edge_undirected[N, E](Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
+  from_edges[N : Default + Eq + Hash, E : Default](Iter[(N, N)], directed~ : Bool = ..) -> Self[N, E]
+  from_edges_with_weights[N : Default + Eq + Hash, E : Default](Iter[(N, N, E)], directed~ : Bool = ..) -> Self[N, E]
   is_directed[N, E](Self[N, E]) -> Bool
   neighbors[N, E](Self[N, E], NodeIndex) -> Iter[NodeIndex]
   new[N, E](directed~ : Bool = ..) -> Self[N, E]
   node_count[N, E](Self[N, E]) -> Int
-  try_add_edge[N, E](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex!
-  try_add_node[N, E](Self[N, E], weight? : N) -> NodeIndex!
+  try_add_edge[N, E : Default](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex!
+  try_add_node[N : Default, E](Self[N, E], weight? : N) -> NodeIndex!
+  with_capacity[N, E](Int, Int, directed~ : Bool = ..) -> Self[N, E]
 }
 impl[N : Show, E : Show] Show for Graph[N, E]
 
