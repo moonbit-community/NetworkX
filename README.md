@@ -12,10 +12,8 @@ This is a Moonbit-based graph library supporting graph editing, traversal, and s
 ### Graph
 Create a graph:
 ```moonbit
-// Create a directed graph
+// directed is optional, default is true
 let graph = Graph::new()
-// Create an undirected graph
-let graph = Graph::new(directed=false)
 ```
 
 Add nodes:
@@ -28,6 +26,15 @@ Add edges:
 ```moonbit
 // weight is optional
 let edge = graph.add_edge(node_a, node_b, weight=2)
+```
+
+Create from edges:
+```moonbit
+let edges = [(1, 2), (2, 3), (3, 4)]
+let graph = Graph::from_edges(edges.iter())
+
+let edges_with_weights = [(1, 2, 1.5), (2, 3, 2.5)]
+let graph = Graph::from_edges_with_weights(edges_with_weights.iter())
 ```
 
 ### DFS
