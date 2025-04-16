@@ -83,6 +83,13 @@ impl Eq for NodeIndex
 impl Hash for NodeIndex
 impl Show for NodeIndex
 
+type Topo
+impl Topo {
+  empty[N, E](Graph[N, E]) -> Self
+  new[N, E](Graph[N, E]) -> Self
+  next[N, E](Self, Graph[N, E]) -> NodeIndex?
+}
+
 type VisitMap
 impl VisitMap {
   new() -> Self
