@@ -16,6 +16,12 @@ fn index(NodeIndex) -> Int
 fn node_count[N, E](Graph[N, E]) -> Int
 
 // Types and methods
+type Bfs
+impl Bfs {
+  new[N, E](Graph[N, E], NodeIndex) -> Self
+  next[N, E](Self, Graph[N, E]) -> NodeIndex?
+}
+
 type Dfs
 impl Dfs {
   empty[N, E](Graph[N, E]) -> Self
@@ -49,7 +55,7 @@ impl Graph {
   add_edge[N, E : Default](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex
   add_node[N : Default, E](Self[N, E], weight? : N) -> NodeIndex
   capacity[N, E](Self[N, E]) -> (Int, Int)
-  dijkstra[N, E : Eq + Compare + Add + Sub + Default](Self[N, E], NodeIndex) -> @hashmap.T[NodeIndex, E]!
+  dijkstra[N, E : Compare + Add + Default](Self[N, E], NodeIndex) -> @hashmap.T[NodeIndex, E]!
   edge_count[N, E](Self[N, E]) -> Int
   edges[N, E : Eq + Hash](Self[N, E], NodeIndex) -> Iter[Edge[E]]
   extend_with_edges[N : Default + Eq + Hash, E : Default](Self[N, E], Iter[(N, N)]) -> Unit

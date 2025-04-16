@@ -340,3 +340,77 @@ test "DfsPostOrder::next" {
   // empty the stack
   inspect!(dfs.next(graph), content="None")
 }
+
+///|
+///|
+
+struct Bfs {
+  stack : @deque.T[NodeIndex]
+  discovered : VisitMap
+}
+
+impl Default for Bfs with default() -> Bfs {
+  Bfs::{
+    stack: @deque.new(),
+    discovered: VisitMap::default(),
+  }
+}
+
+pub fn Bfs::new[N, E](graph : Graph[N, E], start : NodeIndex) -> Bfs {
+  let stack = @deque.new()
+  stack.push_front(start)
+  let discovered = graph.visit_map()
+  discovered.visit(start) |> ignore
+  Bfs::{
+    stack,
+    discovered,
+  }
+}
+
+pub fn Bfs::next[N, E](self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
+  if self.stack.pop_front() is Some(node) {
+    for succ in graph.neighbors(node) {
+      if self.discovered.visit(succ) {
+        self.stack.push_back(succ)
+      }
+    }
+    return Some(node)
+  }
+  None
+}
+
+test "Bfs::next" {
+  let graph = Graph::new()
+  let node_a = graph.add_node()
+  let node_b = graph.add_node()
+  let node_c = graph.add_node()
+  let node_d = graph.add_node()
+  graph.add_edge(node_a, node_b) |> ignore
+  graph.add_edge(node_b, node_c) |> ignore
+  graph.add_edge(node_c, node_d) |> ignore
+  let bfs = Bfs::new(graph, node_a)
+  inspect!(bfs.next(graph), content=Some(node_a).to_string())
+  inspect!(bfs.next(graph), content=Some(node_b).to_string())
+  inspect!(bfs.next(graph), content=Some(node_c).to_string())
+  inspect!(bfs.next(graph), content=Some(node_d).to_string())
+  inspect!(bfs.next(graph), content="None")
+}
+
+test "Bfs::next/multi" {
+  let graph = Graph::new()
+  let node_a = graph.add_node()
+  let node_b = graph.add_node()
+  let node_c = graph.add_node()
+  let node_d = graph.add_node()
+  graph.add_edge(node_a, node_d) |> ignore
+  graph.add_edge(node_a, node_b) |> ignore
+  graph.add_edge(node_b, node_c) |> ignore
+  let bfs = Bfs::new(graph, node_a)
+  inspect!(bfs.next(graph), content=Some(node_a).to_string())
+  inspect!(bfs.next(graph), content=Some(node_b).to_string())
+  inspect!(bfs.next(graph), content=Some(node_d).to_string())
+  inspect!(bfs.next(graph), content=Some(node_c).to_string())
+  inspect!(bfs.next(graph), content="None")
+}
+
+

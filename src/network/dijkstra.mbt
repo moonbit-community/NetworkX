@@ -12,7 +12,7 @@
 /// ```
 /// let dist = graph.dijkstra!(node_start)
 /// ```
-pub fn Graph::dijkstra[N, E : Eq + Compare + Add + Sub + Default](
+pub fn Graph::dijkstra[N, E : Compare + Add + Default](
   self : Graph[N, E],
   a : NodeIndex
 ) -> @hashmap.T[NodeIndex, E]! {
