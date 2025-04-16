@@ -342,7 +342,6 @@ test "DfsPostOrder::next" {
 }
 
 ///|
-///|
 struct Bfs {
   stack : @deque.T[NodeIndex]
   discovered : VisitMap
@@ -353,7 +352,21 @@ impl Default for Bfs with default() -> Bfs {
   Bfs::{ stack: @deque.new(), discovered: VisitMap::default() }
 }
 
-///|
+///| Create a new Breadth-First Search (BFS) instance starting from a given node.
+///
+/// Parameters
+///
+/// - `graph` : The graph on which the BFS will be performed, represented as a `Graph[N, E]`.
+/// - `start` : The starting node for the BFS, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `Bfs` : A new BFS instance initialized with the starting node.
+///
+/// Example
+/// ```
+/// let bfs = Bfs::new(graph, start_node)
+/// ```
 pub fn Bfs::new[N, E](graph : Graph[N, E], start : NodeIndex) -> Bfs {
   let stack = @deque.new()
   stack.push_front(start)
@@ -362,7 +375,33 @@ pub fn Bfs::new[N, E](graph : Graph[N, E], start : NodeIndex) -> Bfs {
   Bfs::{ stack, discovered }
 }
 
-///|
+///| Perform the next step in the Breadth-First Search (BFS) traversal.
+///
+/// Parameters
+///
+/// - `graph` : The graph on which the BFS is being performed, represented as a `Graph[N, E]`.
+///
+/// Returns
+///
+/// - `Option[NodeIndex]` : The next node in the BFS traversal if available, or `None` if the traversal is complete.
+///
+/// Example
+/// ```
+/// let graph = Graph::new()
+/// let node_a = graph.add_node()
+/// let node_b = graph.add_node()
+/// let node_c = graph.add_node()
+/// let node_d = graph.add_node()
+/// graph.add_edge(node_a, node_d) |> ignore
+/// graph.add_edge(node_a, node_b) |> ignore
+/// graph.add_edge(node_b, node_c) |> ignore
+/// let bfs = Bfs::new(graph, node_a)
+/// inspect!(bfs.next(graph), content=Some(node_a).to_string())
+/// inspect!(bfs.next(graph), content=Some(node_b).to_string())
+/// inspect!(bfs.next(graph), content=Some(node_d).to_string())
+/// inspect!(bfs.next(graph), content=Some(node_c).to_string())
+/// inspect!(bfs.next(graph), content="None")
+/// ```
 pub fn Bfs::next[N, E](self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
   if self.stack.pop_front() is Some(node) {
     for succ in graph.neighbors(node) {
@@ -411,12 +450,14 @@ test "Bfs::next/multi" {
   inspect!(bfs.next(graph), content="None")
 }
 
+///|
 struct Topo {
   tovisit : Array[NodeIndex]
   ordered : VisitMap
   degrees : Array[Int]
 }
 
+///|
 impl Default for Topo with default() -> Topo {
   Topo::{
     tovisit: Array::new(),
@@ -425,7 +466,20 @@ impl Default for Topo with default() -> Topo {
   }
 }
 
-///|
+///| Create a new Topological Sort (Topo) instance for a given graph.
+///
+/// Parameters
+///
+/// - `graph` : The graph on which the topological sort will be performed, represented as a `Graph[N, E]`.
+///
+/// Returns
+///
+/// - `Topo` : A new Topo instance initialized with the graph's nodes and their in-degrees.
+///
+/// Example
+/// ```
+/// let topo = Topo::new(graph)
+/// ```
 pub fn Topo::new[N, E](graph : Graph[N, E]) -> Topo {
   let degrees = get_indegree(graph)
   let ordered = graph.visit_map()
@@ -438,6 +492,7 @@ pub fn Topo::new[N, E](graph : Graph[N, E]) -> Topo {
   Topo::{ tovisit, ordered, degrees }
 }
 
+///| Create an empty Topo instance.
 pub fn Topo::empty[N, E](graph : Graph[N, E]) -> Topo {
   Topo::{
     tovisit: Array::new(),
@@ -446,6 +501,35 @@ pub fn Topo::empty[N, E](graph : Graph[N, E]) -> Topo {
   }
 }
 
+///| Perform the next step in the Topological Sort (Topo) traversal.
+///
+/// Parameters
+///
+/// - `graph` : The graph on which the topological sort is being performed, represented as a `Graph[N, E]`.
+///
+/// Returns
+///
+/// - `Option[NodeIndex]` : The next node in the topological order if available, or `None` if the traversal is complete.
+///
+/// Example
+/// ```
+/// let graph = Graph::new()
+/// let node_a = graph.add_node()
+/// let node_b = graph.add_node()
+/// let node_c = graph.add_node()
+/// let node_d = graph.add_node()
+/// graph.add_edge(node_a, node_d) |> ignore
+/// graph.add_edge(node_b, node_d) |> ignore
+/// graph.add_edge(node_c, node_b) |> ignore
+/// graph.add_edge(node_c, node_a) |> ignore
+/// graph.add_edge(node_a, node_b) |> ignore
+/// let topo = Topo::new(graph)
+/// inspect!(topo.next(graph), content=Some(node_c).to_string())
+/// inspect!(topo.next(graph), content=Some(node_a).to_string())
+/// inspect!(topo.next(graph), content=Some(node_b).to_string())
+/// inspect!(topo.next(graph), content=Some(node_d).to_string())
+/// inspect!(topo.next(graph), content="None")
+/// ```
 pub fn Topo::next[N, E](self : Topo, graph : Graph[N, E]) -> NodeIndex? {
   while self.tovisit.pop() is Some(node) {
     if self.ordered.is_visited(node) {
@@ -458,11 +542,12 @@ pub fn Topo::next[N, E](self : Topo, graph : Graph[N, E]) -> NodeIndex? {
         self.tovisit.push(v)
       }
     }
-    return Some(node)    
+    return Some(node)
   }
   None
 }
 
+///|
 test "Topo::next" {
   let graph = Graph::new()
   let node_a = graph.add_node()
@@ -480,6 +565,7 @@ test "Topo::next" {
   inspect!(topo.next(graph), content="None")
 }
 
+///|
 test "Topo::next/multi" {
   let graph = Graph::new()
   let node_a = graph.add_node()
@@ -499,9 +585,10 @@ test "Topo::next/multi" {
   inspect!(topo.next(graph), content="None")
 }
 
+///|
 fn get_indegree[N, E](self : Graph[N, E]) -> Array[Int] {
   let deg = Array::make(self.node_count(), 0)
-  for i in 0 ..< self.node_count() {
+  for i in 0..<self.node_count() {
     let mut edix = self.nodes[i].next.0
     while self.edges.get(edix.ix) is Some(edge) {
       deg[edge.node(1).ix] += 1
@@ -511,6 +598,7 @@ fn get_indegree[N, E](self : Graph[N, E]) -> Array[Int] {
   deg
 }
 
+///|
 test "get_indegree" {
   let graph = Graph::new()
   let node_a = graph.add_node()
