@@ -41,17 +41,28 @@ let graph = Graph::from_edges_with_weights(edges_with_weights.iter())
 
 Create a DFS object:
 ```moonbit
-let dfs = DFS::new(graph)
+let dfs = DFS::new(graph, start_node)
 ```
 
 Create a PostOrder DFS object:
 ```moonbit
-let post_dfs = PostOrderDFS::new(graph)
+let post_dfs = PostOrderDFS::new(graph, start_node)
 ```
 
 Get the next node in the DFS traversal:
 ```moonbit
 let next_node = dfs.next()
+```
+
+### BFS
+Create a BFS object:
+```moonbit
+let bfs = BFS::new(graph, start_node)
+```
+
+Get the next node in the BFS traversal:
+```moonbit
+let next_node = bfs.next()
 ```
 
 ### Dijkstra
@@ -68,5 +79,3 @@ If you have questions, feel free to open an issue in the repository. For other i
 
 ## License
 This project is licensed under the Apache-2.0 License. See the LICENSE file for details.
-
-This project some design patterns, data structures, or algorithmic logic were inspired by the [petgraph](https://github.com/petgraph/petgraph) project, which is licensed under MIT and Apache 2.0.
