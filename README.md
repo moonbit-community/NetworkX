@@ -9,6 +9,7 @@ This is a Moonbit-based graph library supporting graph editing, traversal, and s
 - Support custom weights for nodes and edges
 - Support for depth-first search (DFS) and breadth-first search (BFS)
 - Support for Dijkstra's algorithm for shortest path finding
+- Support for topological sorting
 
 ## Usage
 ### Graph
@@ -71,6 +72,17 @@ let next_node = bfs.next()
 Find the shortest path using Dijkstra's algorithm:
 ```moonbit
 let dijkstra = graph.dijkstra(start_node)
+```
+
+### Topological
+Create a Topo object:
+```moonbit
+let topo = Topo::new(graph)
+```
+
+Get the next node in the topological order:
+```moonbit
+let next_node = topo.next()
 ```
 
 ## Contributing
