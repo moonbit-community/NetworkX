@@ -410,3 +410,119 @@ test "Bfs::next/multi" {
   inspect!(bfs.next(graph), content=Some(node_c).to_string())
   inspect!(bfs.next(graph), content="None")
 }
+
+struct Topo {
+  tovisit : Array[NodeIndex]
+  ordered : VisitMap
+  degrees : Array[Int]
+}
+
+impl Default for Topo with default() -> Topo {
+  Topo::{
+    tovisit: Array::new(),
+    ordered: VisitMap::default(),
+    degrees: Array::new(),
+  }
+}
+
+///|
+pub fn Topo::new[N, E](graph : Graph[N, E]) -> Topo {
+  let degrees = get_indegree(graph)
+  let ordered = graph.visit_map()
+  let tovisit = Array::new()
+  for i in 0..<graph.node_count() {
+    if degrees[i] == 0 {
+      tovisit.push(NodeIndex::new(i))
+    }
+  }
+  Topo::{ tovisit, ordered, degrees }
+}
+
+pub fn Topo::empty[N, E](graph : Graph[N, E]) -> Topo {
+  Topo::{
+    tovisit: Array::new(),
+    ordered: graph.visit_map(),
+    degrees: Array::new(),
+  }
+}
+
+pub fn Topo::next[N, E](self : Topo, graph : Graph[N, E]) -> NodeIndex? {
+  while self.tovisit.pop() is Some(node) {
+    if self.ordered.is_visited(node) {
+      continue
+    }
+    self.ordered.visit(node) |> ignore
+    for v in graph.neighbors(node) {
+      self.degrees[v.ix] -= 1
+      if self.degrees[v.ix] == 0 {
+        self.tovisit.push(v)
+      }
+    }
+    return Some(node)    
+  }
+  None
+}
+
+test "Topo::next" {
+  let graph = Graph::new()
+  let node_a = graph.add_node()
+  let node_b = graph.add_node()
+  let node_c = graph.add_node()
+  let node_d = graph.add_node()
+  graph.add_edge(node_a, node_b) |> ignore
+  graph.add_edge(node_b, node_c) |> ignore
+  graph.add_edge(node_c, node_d) |> ignore
+  let topo = Topo::new(graph)
+  inspect!(topo.next(graph), content=Some(node_a).to_string())
+  inspect!(topo.next(graph), content=Some(node_b).to_string())
+  inspect!(topo.next(graph), content=Some(node_c).to_string())
+  inspect!(topo.next(graph), content=Some(node_d).to_string())
+  inspect!(topo.next(graph), content="None")
+}
+
+test "Topo::next/multi" {
+  let graph = Graph::new()
+  let node_a = graph.add_node()
+  let node_b = graph.add_node()
+  let node_c = graph.add_node()
+  let node_d = graph.add_node()
+  graph.add_edge(node_a, node_d) |> ignore
+  graph.add_edge(node_b, node_d) |> ignore
+  graph.add_edge(node_c, node_b) |> ignore
+  graph.add_edge(node_c, node_a) |> ignore
+  graph.add_edge(node_a, node_b) |> ignore
+  let topo = Topo::new(graph)
+  inspect!(topo.next(graph), content=Some(node_c).to_string())
+  inspect!(topo.next(graph), content=Some(node_a).to_string())
+  inspect!(topo.next(graph), content=Some(node_b).to_string())
+  inspect!(topo.next(graph), content=Some(node_d).to_string())
+  inspect!(topo.next(graph), content="None")
+}
+
+fn get_indegree[N, E](self : Graph[N, E]) -> Array[Int] {
+  let deg = Array::make(self.node_count(), 0)
+  for i in 0 ..< self.node_count() {
+    let mut edix = self.nodes[i].next.0
+    while self.edges.get(edix.ix) is Some(edge) {
+      deg[edge.node(1).ix] += 1
+      edix = edge.next.0
+    }
+  }
+  deg
+}
+
+test "get_indegree" {
+  let graph = Graph::new()
+  let node_a = graph.add_node()
+  let node_b = graph.add_node()
+  let node_c = graph.add_node()
+  let node_d = graph.add_node()
+  graph.add_edge(node_a, node_b) |> ignore
+  graph.add_edge(node_b, node_c) |> ignore
+  graph.add_edge(node_c, node_d) |> ignore
+  let indeg = get_indegree(graph)
+  inspect!(indeg[node_a.ix], content="0")
+  inspect!(indeg[node_b.ix], content="1")
+  inspect!(indeg[node_c.ix], content="1")
+  inspect!(indeg[node_d.ix], content="1")
+}
