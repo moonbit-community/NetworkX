@@ -258,9 +258,12 @@ pub fn Graph::capacity[N, E](self : Graph[N, E]) -> (Int, Int) {
 /// ```
 /// let edges = graph.edges(node_a)
 /// ```
-pub fn Graph::edges[N, E: Eq + Hash](self : Graph[N, E], node : NodeIndex) -> Iter[Edge[E]] {
+pub fn Graph::edges[N, E : Eq + Hash](
+  self : Graph[N, E],
+  node : NodeIndex
+) -> Iter[Edge[E]] {
   let edges = @hashset.new()
-  for i in 0..<(2-self.directed.to_int()) {
+  for i in 0..<(2 - self.directed.to_int()) {
     let mut edix = self.nodes[node.index()].next(i)
     while self.edges.get(edix.ix) is Some(edge) {
       edges.add(edge)

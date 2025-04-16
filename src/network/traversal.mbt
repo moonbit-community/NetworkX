@@ -343,30 +343,26 @@ test "DfsPostOrder::next" {
 
 ///|
 ///|
-
 struct Bfs {
   stack : @deque.T[NodeIndex]
   discovered : VisitMap
 }
 
+///|
 impl Default for Bfs with default() -> Bfs {
-  Bfs::{
-    stack: @deque.new(),
-    discovered: VisitMap::default(),
-  }
+  Bfs::{ stack: @deque.new(), discovered: VisitMap::default() }
 }
 
+///|
 pub fn Bfs::new[N, E](graph : Graph[N, E], start : NodeIndex) -> Bfs {
   let stack = @deque.new()
   stack.push_front(start)
   let discovered = graph.visit_map()
   discovered.visit(start) |> ignore
-  Bfs::{
-    stack,
-    discovered,
-  }
+  Bfs::{ stack, discovered }
 }
 
+///|
 pub fn Bfs::next[N, E](self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
   if self.stack.pop_front() is Some(node) {
     for succ in graph.neighbors(node) {
@@ -379,6 +375,7 @@ pub fn Bfs::next[N, E](self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
   None
 }
 
+///|
 test "Bfs::next" {
   let graph = Graph::new()
   let node_a = graph.add_node()
@@ -396,6 +393,7 @@ test "Bfs::next" {
   inspect!(bfs.next(graph), content="None")
 }
 
+///|
 test "Bfs::next/multi" {
   let graph = Graph::new()
   let node_a = graph.add_node()
@@ -412,5 +410,3 @@ test "Bfs::next/multi" {
   inspect!(bfs.next(graph), content=Some(node_c).to_string())
   inspect!(bfs.next(graph), content="None")
 }
-
-
