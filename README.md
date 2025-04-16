@@ -7,6 +7,8 @@ This is a Moonbit-based graph library supporting graph editing, traversal, and s
 - Support for directed and undirected graphs
 - Multiple graph algorithms implemented
 - Support custom weights for nodes and edges
+- Support for depth-first search (DFS) and breadth-first search (BFS)
+- Support for Dijkstra's algorithm for shortest path finding
 
 ## Usage
 ### Graph
