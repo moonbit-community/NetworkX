@@ -71,26 +71,26 @@ impl VM for VisitMap with is_visited(self, node : NodeIndex) -> Bool {
 }
 
 ///|
-impl VM for VisitMap with unvisit(self, node : NodeIndex) -> Bool {
-  if self.is_visited(node) {
-    // self.visit[node] = not(self.visit[node].unwrap())
-    self.visit[node.ix] = not(self.visit[node.ix])
-    return true
-  }
-  false
-}
+// impl VM for VisitMap with unvisit(self, node : NodeIndex) -> Bool {
+//   if self.is_visited(node) {
+//     // self.visit[node] = not(self.visit[node].unwrap())
+//     self.visit[node.ix] = not(self.visit[node.ix])
+//     return true
+//   }
+//   false
+// }
 
 ///|
 priv trait VM {
   visit(Self, NodeIndex) -> Bool
   is_visited(Self, NodeIndex) -> Bool
-  unvisit(Self, NodeIndex) -> Bool
+  // unvisit(Self, NodeIndex) -> Bool
 }
 
 ///|
 priv trait Visitable {
   visit_map(Self) -> VisitMap
-  reset_map(Self, VisitMap) -> Unit
+  // reset_map(Self, VisitMap) -> Unit
 }
 
 ///|
@@ -99,10 +99,10 @@ impl[N, E] Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
 }
 
 ///|
-impl[N, E] Visitable for Graph[N, E] with reset_map(self, map) -> Unit {
-  map.clear()
-  map.grow(self.node_count())
-}
+// impl[N, E] Visitable for Graph[N, E] with reset_map(self, map) -> Unit {
+//   map.clear()
+//   map.grow(self.node_count())
+// }
 
 ///|
 fn VisitMap::clear(self : VisitMap) -> Unit {
