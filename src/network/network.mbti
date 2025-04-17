@@ -22,6 +22,9 @@ impl Bfs {
   next[N, E](Self, Graph[N, E]) -> NodeIndex?
 }
 
+type CycleDetected
+impl Show for CycleDetected
+
 type Dfs
 impl Dfs {
   empty[N, E](Graph[N, E]) -> Self
@@ -64,6 +67,7 @@ impl Graph {
   find_edge_undirected[N, E](Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
   from_edges[N : Default + Eq + Hash, E : Default](Iter[(N, N)], directed~ : Bool = ..) -> Self[N, E]
   from_edges_with_weights[N : Default + Eq + Hash, E : Default](Iter[(N, N, E)], directed~ : Bool = ..) -> Self[N, E]
+  is_cyclic[N, E](Self[N, E]) -> Bool
   is_directed[N, E](Self[N, E]) -> Bool
   neighbors[N, E](Self[N, E], NodeIndex) -> Iter[NodeIndex]
   new[N, E](directed~ : Bool = ..) -> Self[N, E]
@@ -73,6 +77,13 @@ impl Graph {
   with_capacity[N, E](Int, Int, directed~ : Bool = ..) -> Self[N, E]
 }
 impl[N : Show, E : Show] Show for Graph[N, E]
+
+type Lca[N, E]
+impl Lca {
+  new[N, E](Graph[N, E], NodeIndex) -> Self[N, E]!CycleDetected
+  query[N, E](Self[N, E], NodeIndex, NodeIndex) -> NodeIndex
+  reset[N, E](Self[N, E], root? : NodeIndex) -> Unit
+}
 
 type NodeIndex
 impl NodeIndex {
