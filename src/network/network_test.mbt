@@ -6,7 +6,7 @@ test "Graph::new" {
   } derive(Default)
   let graph : @network.Graph[weight, Unit] = Graph::new()
   // graph.add_node(weight=weight::{ value: 1, unit: "kg" }) |> ignore
-  graph.add_node(weight=weight::{}) |> ignore
+  graph.add_node(weight=weight::{  }) |> ignore
 }
 
 ///|
