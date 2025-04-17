@@ -6,7 +6,7 @@ struct Lca[N, E] {
   mut root : NodeIndex
 }
 
-///|
+///| dfs0
 fn Lca::update_lca_info_pre[N, E](
   self : Lca[N, E],
   graph : Graph[N, E],
@@ -41,7 +41,21 @@ fn Lca::update_lca_info[N, E](
   }
 }
 
-///|
+///| Create a new Lowest Common Ancestor (LCA) instance
+///
+/// Parameters
+///
+/// - `graph` : The graph on which the LCA computation will be performed, represented as a `Graph[N, E]`.
+/// - `root` : The root node for the LCA computation, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `Lca[N, E]` : A new LCA instance initialized with the graph and root node.
+///
+/// Example
+/// ```
+/// let lca = Lca::new(graph, root)
+/// ```
 pub fn Lca::new[N, E](graph : Graph[N, E], root : NodeIndex) -> Lca[N, E] {
   let n = graph.node_count()
   let deep = Array::make(n + 1, 0)
@@ -52,7 +66,21 @@ pub fn Lca::new[N, E](graph : Graph[N, E], root : NodeIndex) -> Lca[N, E] {
   lca
 }
 
-///|
+///| Query the Lowest Common Ancestor (LCA) of two nodes in the graph
+///
+/// Parameters
+///
+/// - `u` : The first node, represented as a `NodeIndex`.
+/// - `v` : The second node, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `NodeIndex` : The Lowest Common Ancestor of the two nodes.
+///
+/// Example
+/// ```
+/// let ancestor = lca.query(node_a, node_b)
+/// ```
 pub fn Lca::query[N, E](
   self : Lca[N, E],
   u : NodeIndex,
@@ -84,10 +112,26 @@ pub fn Lca::query[N, E](
   NodeIndex::new(self.father[u][0])
 }
 
-///|
-pub fn Lca::reset[N, E](self : Lca[N, E], root : NodeIndex) -> Unit {
-  self.root = root
-  self.update_lca_info(self.graph, root, NodeIndex::new(-1), 1)
+///| Reset the Lowest Common Ancestor (LCA) instance
+///
+/// Parameters
+///
+/// - `root?` : (Optional) The new root node for the LCA computation, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `Unit` : This function updates the LCA instance in place.
+///
+/// Example
+/// ```
+/// lca.reset()
+/// lca.reset(new_root)
+/// ```
+pub fn Lca::reset[N, E](self : Lca[N, E], root? : NodeIndex) -> Unit {
+  if root is Some(r) {
+    self.root = r
+  }
+  self.update_lca_info(self.graph, self.root, NodeIndex::new(-1), 1)
 }
 
 ///|
