@@ -644,3 +644,48 @@ test "from_edges_with_weights" {
   inspect!(g.edges[0].weight, content="1")
   inspect!(g.edges[1].weight, content="2")
 }
+
+///| Check if the graph contains a cycle.
+///
+/// Parameters
+///
+/// - `self` : The graph to be checked, represented as a `Graph[N, E]`.
+///
+/// Returns
+///
+/// - `Bool` : `true` if the graph contains a cycle, `false` otherwise.
+///
+/// Example
+/// ```
+/// let g = Graph::from_edges([(1, 2), (2, 3)].iter())
+/// inspect!(g.is_cyclic(), content="false")
+/// g.add_edge(NodeIndex::new(0), NodeIndex::new(2)) |> ignore
+/// inspect!(g.is_cyclic(), content="false")
+/// g.add_edge(NodeIndex::new(2), NodeIndex::new(0)) |> ignore
+/// inspect!(g.is_cyclic(), content="true")
+/// ```
+pub fn Graph::is_cyclic[N, E](self : Graph[N, E]) -> Bool {
+  let topo = Topo::new(self)
+  while topo.next(self) is Some(_) {
+
+  }
+  topo.degrees.iter().any(fn(d) { d != 0 })
+}
+
+///|
+test "Graph::is_cyclic/directed" {
+  let g = Graph::from_edges([(1, 2), (2, 3)].iter())
+  inspect!(g.is_cyclic(), content="false")
+  g.add_edge(NodeIndex::new(0), NodeIndex::new(2)) |> ignore
+  inspect!(g.is_cyclic(), content="false")
+  g.add_edge(NodeIndex::new(2), NodeIndex::new(0)) |> ignore
+  inspect!(g.is_cyclic(), content="true")
+}
+
+///|
+test "Graph::is_cyclic/undirected" {
+  let g = Graph::from_edges([(1, 2), (2, 3)].iter(), directed=false)
+  inspect!(g.is_cyclic(), content="false")
+  g.add_edge(NodeIndex::new(0), NodeIndex::new(2)) |> ignore
+  inspect!(g.is_cyclic(), content="false")
+}
