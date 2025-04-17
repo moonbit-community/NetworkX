@@ -8,8 +8,7 @@ This is a Moonbit-based graph library supporting graph editing, traversal, and s
 - Multiple graph algorithms implemented
 - Support custom weights for nodes and edges
 - Support for depth-first search (DFS) and breadth-first search (BFS)
-- Support for Dijkstra's algorithm for shortest path finding
-- Support for topological sorting
+- Support for Dijkstra / Topological / LCA algorithms
 
 ## Usage
 ### Graph
@@ -83,6 +82,17 @@ let topo = Topo::new(graph)
 Get the next node in the topological order:
 ```moonbit
 let next_node = topo.next()
+```
+
+### LCA
+Create a LCA object:
+```moonbit
+let lca = LCA::new!(graph, root_node)
+```
+
+Find the lowest common ancestor of two nodes:
+```moonbit
+let ancestor = lca.lca(node_a, node_b)
 ```
 
 ## Contributing
