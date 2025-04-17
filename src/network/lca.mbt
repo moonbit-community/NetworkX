@@ -51,12 +51,22 @@ fn Lca::update_lca_info[N, E](
 /// Returns
 ///
 /// - `Lca[N, E]` : A new LCA instance initialized with the graph and root node.
+/// 
+/// Errors
+///
+/// - `CycleDetected` : Raised if the input graph contains a cycle.
 ///
 /// Example
 /// ```
-/// let lca = Lca::new(graph, root)
+/// let lca = Lca::new!(graph, root)
 /// ```
-pub fn Lca::new[N, E](graph : Graph[N, E], root : NodeIndex) -> Lca[N, E] {
+pub fn Lca::new[N, E](
+  graph : Graph[N, E],
+  root : NodeIndex
+) -> Lca[N, E]!CycleDetected {
+  guard graph.is_cyclic() == false else {
+    raise CycleDetected("There is a cycle in the graph")
+  }
   let n = graph.node_count()
   let deep = Array::make(n + 1, 0)
   let top = @math.log2((n + 1).to_double()).to_int()
@@ -140,7 +150,7 @@ test "Lca::query/undir1" {
   let a = graph.add_node()
   let b = graph.add_node()
   graph.add_edge(a, b) |> ignore
-  let lca = Lca::new(graph, a)
+  let lca = Lca::new!(graph, a)
   inspect!(lca.query(a, b), content=a.to_string())
   inspect!(lca.query(b, a), content=a.to_string())
   inspect!(lca.query(a, a), content=a.to_string())
@@ -157,7 +167,7 @@ test "Lca::query/undir2" {
   graph.add_edge(a, b) |> ignore
   graph.add_edge(b, c) |> ignore
   graph.add_edge(c, d) |> ignore
-  let lca = Lca::new(graph, a)
+  let lca = Lca::new!(graph, a)
   inspect!(lca.query(b, d), content=b.to_string())
   inspect!(lca.query(c, d), content=c.to_string())
   inspect!(lca.query(a, d), content=a.to_string())
@@ -176,7 +186,7 @@ test "Lca::query/undir3" {
   graph.add_edge(b, c) |> ignore
   graph.add_edge(a, d) |> ignore
   graph.add_edge(d, e) |> ignore
-  let lca = Lca::new(graph, a)
+  let lca = Lca::new!(graph, a)
   inspect!(lca.query(c, e), content=a.to_string())
   inspect!(lca.query(c, d), content=a.to_string())
   inspect!(lca.query(b, e), content=a.to_string())
@@ -197,7 +207,7 @@ test "Lca::query/dir" {
   graph.add_edge(b, c) |> ignore
   graph.add_edge(a, d) |> ignore
   graph.add_edge(d, e) |> ignore
-  let lca = Lca::new(graph, a)
+  let lca = Lca::new!(graph, a)
   inspect!(lca.query(c, e), content=a.to_string())
   inspect!(lca.query(c, d), content=a.to_string())
   inspect!(lca.query(b, e), content=a.to_string())
