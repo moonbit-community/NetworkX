@@ -1,15 +1,17 @@
+///|
 fn get_tuple[T](tuple : (T, T), index : Int) -> T {
-    if index == 0{
-      return tuple.0
-    }
-    tuple.1
+  if index == 0 {
+    return tuple.0
+  }
+  tuple.1
 }
 
+///|
 fn set_tuple[T](tuple : (T, T), index : Int, value : T) -> (T, T) {
-    if index == 0{
-      return (value, tuple.1)
-    }
-    (tuple.0, value)
+  if index == 0 {
+    return (value, tuple.1)
+  }
+  (tuple.0, value)
 }
 
 // fn swap_remove[T](a : Array[T], index : Int) -> T? {

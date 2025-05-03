@@ -733,12 +733,20 @@ fn change_edge_links[N, E](
     }
     let fst = node.next(k)
     if fst == e {
-      self.nodes[node.ix.ix].next = set_tuple(node.next, k, get_tuple(edge_next, k))
+      self.nodes[node.ix.ix].next = set_tuple(
+        node.next,
+        k,
+        get_tuple(edge_next, k),
+      )
     } else {
       let mut prev = fst
       while self.edges.get(prev.ix) is Some(edge) {
         if edge.next(k) == e {
-          self.nodes[prev.ix].next = set_tuple(edge.next, k, get_tuple(edge_next, k))
+          self.nodes[prev.ix].next = set_tuple(
+            edge.next,
+            k,
+            get_tuple(edge_next, k),
+          )
           break
         }
         prev = edge.next(k)
@@ -789,12 +797,8 @@ fn remove_edge_adjust_indices[N, E](self : Graph[N, E], e : EdgeIndex) -> E? {
     None => return Some(edge.weight)
     Some(ed) => ed
   }
-  let swapped_e = EdgeIndex::new(
-    self.edges.length(),
-    edge.node.0,
-    -1
-  )
-  self.change_edge_links(swap.node, swapped_e, (e, e));
+  let swapped_e = EdgeIndex::new(self.edges.length(), edge.node.0, -1)
+  self.change_edge_links(swap.node, swapped_e, (e, e))
   Some(edge.weight)
 }
 
@@ -816,19 +820,16 @@ fn remove_edge_adjust_indices[N, E](self : Graph[N, E], e : EdgeIndex) -> E? {
 /// let edge = graph.add_edge(node_a, node_b, weight=10)
 /// inspect!(graph.remove_edge(edge), content="Some(10)")
 /// ```
-pub fn remove_edge[N, E](
-  self : Graph[N, E],
-  e : EdgeIndex
-) -> E? {
+pub fn remove_edge[N, E](self : Graph[N, E], e : EdgeIndex) -> E? {
   let (edge_node, edge_next) = match self.edges.get(e.index()) {
-      None => return None
-      Some(x) => (x.node, x.next)
+    None => return None
+    Some(x) => (x.node, x.next)
   }
-  
   self.change_edge_links(edge_node, e, edge_next)
   self.remove_edge_adjust_indices(e)
 }
 
+///|
 test "remove_edge/single" {
   let g = Graph::new()
   let node_a = g.add_node(weight=0)
@@ -842,6 +843,7 @@ test "remove_edge/single" {
   inspect!(g.find_edge(node_a, node_b), content="None")
 }
 
+///|
 test "remove_edge/multi" {
   let g = Graph::new()
   let node_a = g.add_node(weight=0)
