@@ -18,30 +18,28 @@ Create a graph:
 let graph = Graph::new()
 ```
 
-Add nodes:
-```moonbit
-// weight is optional
-let node_a = graph.add_node(weight=1)
-```
-
-Add edges:
-```moonbit
-// weight is optional
-let edge = graph.add_edge(node_a, node_b, weight=2)
-```
-
-Remove edges:
-```moonbit
-let removed_edge_weight = graph.remove_edge(edge_ix)
-```
-
-Create from edges:
+Create graph from edges:
 ```moonbit
 let edges = [(1, 2), (2, 3), (3, 4)]
 let graph = Graph::from_edges(edges.iter())
 
 let edges_with_weights = [(1, 2, 1.5), (2, 3, 2.5)]
 let graph = Graph::from_edges_with_weights(edges_with_weights.iter())
+```
+
+Add nodes & edges:
+```moonbit
+// weight is optional
+let node_a = graph.add_node(weight=1)
+
+let edge = graph.add_edge(node_a, node_b, weight=2)
+```
+
+Remove nodes & edges:
+```moonbit
+let removed_node_weight = graph.remove_node(node_ix)
+
+let removed_edge_weight = graph.remove_edge(edge_ix)
 ```
 
 ### DFS
