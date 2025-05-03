@@ -208,7 +208,7 @@ test "add_edge/multi" {
   inspect!(graph.edges[edge_ab.ix].node.0.ix, content="0")
   inspect!(graph.edges[edge_ab.ix].node.1.ix, content="1")
   inspect!(graph.edges[edge_ab.ix].next.0.ix, content="2147483647")
-  inspect!(graph.edges[edge_ab.ix].next.0.ix, content="2147483647")
+  inspect!(graph.edges[edge_ab.ix].next.1.ix, content="2147483647")
   let edge_ac = graph.add_edge(node_a, node_c, weight=2)
   inspect!(graph.nodes[node_a.ix].next.0.ix, content="1")
   inspect!(graph.nodes[node_c.ix].next.1.ix, content="1")
@@ -688,4 +688,175 @@ test "Graph::is_cyclic/undirected" {
   inspect!(g.is_cyclic(), content="false")
   g.add_edge(NodeIndex::new(0), NodeIndex::new(2)) |> ignore
   inspect!(g.is_cyclic(), content="false")
+}
+
+///|
+fn EdgeIndex::index(self : EdgeIndex) -> Int {
+  self.ix
+}
+
+///| 
+fn directed[N, E](self : Graph[N, E]) -> Array[Int] {
+  if self.directed {
+    [0]
+  } else {
+    [0, 1]
+  }
+}
+
+///| Adjust the edge links in the graph after an edge is removed or modified.
+///
+/// Parameters
+///
+/// - `edge_node` : A tuple `(NodeIndex, NodeIndex)` representing the nodes connected by the edge.
+/// - `e` : The edge to be adjusted, represented as an `EdgeIndex`.
+/// - `edge_next` : A tuple `(EdgeIndex, EdgeIndex)` representing the next edges in the adjacency list.
+///
+/// Returns
+///
+/// - `Unit` : This function modifies the graph in place.
+///
+fn change_edge_links[N, E](
+  self : Graph[N, E],
+  edge_node : (NodeIndex, NodeIndex),
+  e : EdgeIndex,
+  edge_next : (EdgeIndex, EdgeIndex)
+) -> Unit {
+  for d in directed(self) {
+    let k = d
+    let node = match self.nodes.get(get_tuple(edge_node, k).index()) {
+      Some(r) => r
+      None => {
+        abort("Node index out of bounds")
+        return
+      }
+    }
+    let fst = node.next(k)
+    if fst == e {
+      self.nodes[node.ix.ix].next = set_tuple(node.next, k, get_tuple(edge_next, k))
+    } else {
+      let mut prev = fst
+      while self.edges.get(prev.ix) is Some(edge) {
+        if edge.next(k) == e {
+          self.nodes[prev.ix].next = set_tuple(edge.next, k, get_tuple(edge_next, k))
+          break
+        }
+        prev = edge.next(k)
+      }
+    }
+  }
+}
+
+// test "change_edge_links" {
+//   let g = Graph::new()
+//   let node_a = g.add_node()
+//   let node_b = g.add_node()
+//   let node_c = g.add_node()
+//   let edge_ab = g.add_edge(node_a, node_b)
+//   inspect!(g.edges[edge_ab.ix].next.0.ix, content="2147483647")
+//   inspect!(g.edges[edge_ab.ix].next.1.ix, content="2147483647")
+//   let edge_ac = g.add_edge(node_a, node_c)
+//   inspect!(g.edges[edge_ac.ix].next.0.ix, content="0")
+//   inspect!(g.edges[edge_ac.ix].next.1.ix, content="2147483647")
+
+// }
+
+///| Adjust the indices of edges in the graph after removing an edge.
+///
+/// Parameters
+///
+/// - `e` : The edge to be removed, represented as an `EdgeIndex`.
+///
+/// Returns
+///
+/// - `Option[E]` : The weight of the removed edge if it exists, or `None` if the edge does not exist.
+///
+/// Example
+/// ```
+/// let graph = Graph::new()
+/// let node_a = graph.add_node()
+/// let node_b = graph.add_node()
+/// let edge = graph.add_edge(node_a, node_b, weight=10)
+/// inspect!(graph.remove_edge_adjust_indices(edge), content="Some(10)")
+/// ```
+fn remove_edge_adjust_indices[N, E](self : Graph[N, E], e : EdgeIndex) -> E? {
+  let last_index = self.edges.length() - 1
+  if e.index() != last_index {
+    self.edges.swap(e.index(), last_index)
+  }
+  let edge = self.edges.remove(last_index)
+  let swap = match self.edges.get(e.index()) {
+    None => return Some(edge.weight)
+    Some(ed) => ed
+  }
+  let swapped_e = EdgeIndex::new(
+    self.edges.length(),
+    edge.node.0,
+    -1
+  )
+  self.change_edge_links(swap.node, swapped_e, (e, e));
+  Some(edge.weight)
+}
+
+///| Remove an edge from the graph.
+///
+/// Parameters
+///
+/// - `e` : The edge to be removed, represented as an `EdgeIndex`.
+///
+/// Returns
+///
+/// - `Option[E]` : The weight of the removed edge if it exists, or `None` if the edge does not exist.
+///
+/// Example
+/// ```
+/// let graph = Graph::new()
+/// let node_a = graph.add_node()
+/// let node_b = graph.add_node()
+/// let edge = graph.add_edge(node_a, node_b, weight=10)
+/// inspect!(graph.remove_edge(edge), content="Some(10)")
+/// ```
+pub fn remove_edge[N, E](
+  self : Graph[N, E],
+  e : EdgeIndex
+) -> E? {
+  let (edge_node, edge_next) = match self.edges.get(e.index()) {
+      None => return None
+      Some(x) => (x.node, x.next)
+  }
+  
+  self.change_edge_links(edge_node, e, edge_next)
+  self.remove_edge_adjust_indices(e)
+}
+
+test "remove_edge/single" {
+  let g = Graph::new()
+  let node_a = g.add_node(weight=0)
+  let node_b = g.add_node(weight=1)
+  let node_c = g.add_node(weight=2)
+  let edge_ab = g.add_edge(node_a, node_b, weight=1)
+  g.add_edge(node_a, node_c, weight=2) |> ignore
+  inspect!(g.edge_count(), content="2")
+  inspect!(g.remove_edge(edge_ab), content="Some(1)")
+  inspect!(g.edge_count(), content="1")
+  inspect!(g.find_edge(node_a, node_b), content="None")
+}
+
+test "remove_edge/multi" {
+  let g = Graph::new()
+  let node_a = g.add_node(weight=0)
+  let node_b = g.add_node(weight=1)
+  let node_c = g.add_node(weight=2)
+  let edge_ab = g.add_edge(node_a, node_b, weight=1)
+  let edge_ac = g.add_edge(node_a, node_c, weight=2)
+  inspect!(g.edge_count(), content="2")
+  inspect!(g.remove_edge(edge_ab), content="Some(1)")
+  inspect!(g.edge_count(), content="1")
+  inspect!(g.find_edge(node_a, node_b), content="None")
+  // beacause the edge_ac is removed to the start of the list
+  // so ix chenge from 1 -> 0
+  let edge_ac = EdgeIndex::new(0, edge_ac.from, edge_ac.successor_index)
+  inspect!(g.remove_edge(edge_ac), content="Some(2)")
+  inspect!(g.edge_count(), content="0")
+  inspect!(g.find_edge(node_a, node_c), content="None")
 }
