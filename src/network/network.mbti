@@ -17,6 +17,8 @@ fn node_count[N, E](Graph[N, E]) -> Int
 
 fn remove_edge[N, E](Graph[N, E], EdgeIndex) -> E?
 
+fn remove_node[N, E](Graph[N, E], NodeIndex) -> N?
+
 // Types and methods
 type Bfs
 impl Bfs {
@@ -75,6 +77,7 @@ impl Graph {
   new[N, E](directed~ : Bool = ..) -> Self[N, E]
   node_count[N, E](Self[N, E]) -> Int
   remove_edge[N, E](Self[N, E], EdgeIndex) -> E?
+  remove_node[N, E](Self[N, E], NodeIndex) -> N?
   try_add_edge[N, E : Default](Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex!
   try_add_node[N : Default, E](Self[N, E], weight? : N) -> NodeIndex!
   with_capacity[N, E](Int, Int, directed~ : Bool = ..) -> Self[N, E]
