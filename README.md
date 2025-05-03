@@ -30,6 +30,11 @@ Add edges:
 let edge = graph.add_edge(node_a, node_b, weight=2)
 ```
 
+Remove edges:
+```moonbit
+let removed_edge_weight = graph.remove_edge(edge_ix)
+```
+
 Create from edges:
 ```moonbit
 let edges = [(1, 2), (2, 3), (3, 4)]
