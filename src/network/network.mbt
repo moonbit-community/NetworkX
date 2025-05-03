@@ -22,7 +22,7 @@ struct Edge[E] {
   ix : EdgeIndex
   weight : E
   mut next : (EdgeIndex, EdgeIndex)
-  node : (NodeIndex, NodeIndex)
+  mut node : (NodeIndex, NodeIndex)
 } derive(Show, Eq, Hash)
 
 ///|
@@ -696,7 +696,7 @@ fn EdgeIndex::index(self : EdgeIndex) -> Int {
 }
 
 ///| 
-fn directed[N, E](self : Graph[N, E]) -> Array[Int] {
+fn directions[N, E](self : Graph[N, E]) -> Array[Int] {
   if self.directed {
     [0]
   } else {
@@ -722,7 +722,7 @@ fn change_edge_links[N, E](
   e : EdgeIndex,
   edge_next : (EdgeIndex, EdgeIndex)
 ) -> Unit {
-  for d in directed(self) {
+  for d in directions(self) {
     let k = d
     let node = match self.nodes.get(get_tuple(edge_node, k).index()) {
       Some(r) => r
@@ -754,20 +754,6 @@ fn change_edge_links[N, E](
     }
   }
 }
-
-// test "change_edge_links" {
-//   let g = Graph::new()
-//   let node_a = g.add_node()
-//   let node_b = g.add_node()
-//   let node_c = g.add_node()
-//   let edge_ab = g.add_edge(node_a, node_b)
-//   inspect!(g.edges[edge_ab.ix].next.0.ix, content="2147483647")
-//   inspect!(g.edges[edge_ab.ix].next.1.ix, content="2147483647")
-//   let edge_ac = g.add_edge(node_a, node_c)
-//   inspect!(g.edges[edge_ac.ix].next.0.ix, content="0")
-//   inspect!(g.edges[edge_ac.ix].next.1.ix, content="2147483647")
-
-// }
 
 ///| Adjust the indices of edges in the graph after removing an edge.
 ///
@@ -861,4 +847,64 @@ test "remove_edge/multi" {
   inspect!(g.remove_edge(edge_ac), content="Some(2)")
   inspect!(g.edge_count(), content="0")
   inspect!(g.find_edge(node_a, node_c), content="None")
+}
+
+///| Remove a node from the graph.
+///
+/// Parameters
+///
+/// - `a` : The node to be removed, represented as a `NodeIndex`.
+///
+/// Returns
+///
+/// - `Option[N]` : The weight of the removed node if it exists, or `None` if the node does not exist.
+///
+/// Example
+/// ```
+/// let graph = Graph::new()
+/// let node_a = graph.add_node(weight=1)
+/// inspect!(graph.remove_node(node_a), content="Some(1)")
+/// ```
+pub fn remove_node[N, E](self : Graph[N, E], a : NodeIndex) -> N? {
+  guard self.nodes.get(a.index()) is Some(_) else { return None }
+  fn remove_chain(a : NodeIndex, k : Int) -> Unit {
+    let next = self.nodes[a.index()].next(k)
+    if next == EdgeIndex::end() {
+      return
+    }
+    self.remove_edge(next) |> ignore
+    remove_chain(a, k)
+  }
+
+  for d in directions(self) {
+    let k = d
+    remove_chain(a, k)
+  }
+  // remove the node
+  let last_index = self.nodes.length() - 1
+  if a.index() != last_index {
+    self.nodes.swap(a.index(), last_index)
+  }
+  let node = self.nodes.remove(last_index)
+  let swap_edges = match self.edges.get(a.index()) {
+    None => return Some(node.weight)
+    Some(ed) => ed.next
+  }
+
+  // let old_index = NodeIndex::new(self.nodes.length())
+  let new_index = a
+  for d in directions(self) {
+    let k = d
+    let mut cur = get_tuple(swap_edges, k)
+    while cur != EdgeIndex::end() {
+      let next = get_tuple(self.edges[cur.index()].next, k)
+      self.edges[cur.index()].node = set_tuple(
+        self.edges[cur.index()].node,
+        k,
+        new_index,
+      )
+      cur = next
+    }
+  }
+  Some(node.weight)
 }
