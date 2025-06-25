@@ -7,7 +7,7 @@ struct Lca[N, E] {
 }
 
 ///| dfs0
-fn Lca::update_lca_info_pre[N, E](
+fn[N, E] Lca::update_lca_info_pre(
   self : Lca[N, E],
   graph : Graph[N, E],
   u : NodeIndex,
@@ -24,7 +24,7 @@ fn Lca::update_lca_info_pre[N, E](
 }
 
 ///|
-fn Lca::update_lca_info[N, E](
+fn[N, E] Lca::update_lca_info(
   self : Lca[N, E],
   graph : Graph[N, E],
   u : NodeIndex,
@@ -60,10 +60,10 @@ fn Lca::update_lca_info[N, E](
 /// ```
 /// let lca = Lca::new!(graph, root)
 /// ```
-pub fn Lca::new[N, E](
+pub fn[N, E] Lca::new(
   graph : Graph[N, E],
   root : NodeIndex
-) -> Lca[N, E]!CycleDetected {
+) -> Lca[N, E] raise CycleDetected {
   guard graph.is_cyclic() == false else {
     raise CycleDetected("There is a cycle in the graph")
   }
@@ -91,7 +91,7 @@ pub fn Lca::new[N, E](
 /// ```
 /// let ancestor = lca.query(node_a, node_b)
 /// ```
-pub fn Lca::query[N, E](
+pub fn[N, E] Lca::query(
   self : Lca[N, E],
   u : NodeIndex,
   v : NodeIndex
@@ -137,7 +137,7 @@ pub fn Lca::query[N, E](
 /// lca.reset()
 /// lca.reset(new_root)
 /// ```
-pub fn Lca::reset[N, E](self : Lca[N, E], root? : NodeIndex) -> Unit {
+pub fn[N, E] Lca::reset(self : Lca[N, E], root? : NodeIndex) -> Unit {
   if root is Some(r) {
     self.root = r
   }
@@ -146,20 +146,20 @@ pub fn Lca::reset[N, E](self : Lca[N, E], root? : NodeIndex) -> Unit {
 
 ///|
 test "Lca::query/undir1" {
-  let graph = Graph::new(directed=false)
+  let graph: Graph[Unit, Unit] = Graph::new(directed=false)
   let a = graph.add_node()
   let b = graph.add_node()
   graph.add_edge(a, b) |> ignore
-  let lca = Lca::new!(graph, a)
-  inspect!(lca.query(a, b), content=a.to_string())
-  inspect!(lca.query(b, a), content=a.to_string())
-  inspect!(lca.query(a, a), content=a.to_string())
-  inspect!(lca.query(b, b), content=b.to_string())
+  let lca = Lca::new(graph, a)
+  inspect(lca.query(a, b), content=a.to_string())
+  inspect(lca.query(b, a), content=a.to_string())
+  inspect(lca.query(a, a), content=a.to_string())
+  inspect(lca.query(b, b), content=b.to_string())
 }
 
 ///|
 test "Lca::query/undir2" {
-  let graph = Graph::new(directed=false)
+  let graph: Graph[Unit, Unit] = Graph::new(directed=false)
   let a = graph.add_node()
   let b = graph.add_node()
   let c = graph.add_node()
@@ -167,16 +167,16 @@ test "Lca::query/undir2" {
   graph.add_edge(a, b) |> ignore
   graph.add_edge(b, c) |> ignore
   graph.add_edge(c, d) |> ignore
-  let lca = Lca::new!(graph, a)
-  inspect!(lca.query(b, d), content=b.to_string())
-  inspect!(lca.query(c, d), content=c.to_string())
-  inspect!(lca.query(a, d), content=a.to_string())
-  inspect!(lca.query(a, c), content=a.to_string())
+  let lca = Lca::new(graph, a)
+  inspect(lca.query(b, d), content=b.to_string())
+  inspect(lca.query(c, d), content=c.to_string())
+  inspect(lca.query(a, d), content=a.to_string())
+  inspect(lca.query(a, c), content=a.to_string())
 }
 
 ///|
 test "Lca::query/undir3" {
-  let graph = Graph::new(directed=false)
+  let graph: Graph[Unit, Unit] = Graph::new(directed=false)
   let a = graph.add_node()
   let b = graph.add_node()
   let c = graph.add_node()
@@ -186,18 +186,18 @@ test "Lca::query/undir3" {
   graph.add_edge(b, c) |> ignore
   graph.add_edge(a, d) |> ignore
   graph.add_edge(d, e) |> ignore
-  let lca = Lca::new!(graph, a)
-  inspect!(lca.query(c, e), content=a.to_string())
-  inspect!(lca.query(c, d), content=a.to_string())
-  inspect!(lca.query(b, e), content=a.to_string())
-  inspect!(lca.query(b, d), content=a.to_string())
-  inspect!(lca.query(c, b), content=b.to_string())
-  inspect!(lca.query(a, c), content=a.to_string())
+  let lca = Lca::new(graph, a)
+  inspect(lca.query(c, e), content=a.to_string())
+  inspect(lca.query(c, d), content=a.to_string())
+  inspect(lca.query(b, e), content=a.to_string())
+  inspect(lca.query(b, d), content=a.to_string())
+  inspect(lca.query(c, b), content=b.to_string())
+  inspect(lca.query(a, c), content=a.to_string())
 }
 
 ///|
 test "Lca::query/dir" {
-  let graph = Graph::new(directed=true)
+  let graph: Graph[Unit, Unit] = Graph::new(directed=true)
   let a = graph.add_node()
   let b = graph.add_node()
   let c = graph.add_node()
@@ -207,10 +207,10 @@ test "Lca::query/dir" {
   graph.add_edge(b, c) |> ignore
   graph.add_edge(a, d) |> ignore
   graph.add_edge(d, e) |> ignore
-  let lca = Lca::new!(graph, a)
-  inspect!(lca.query(c, e), content=a.to_string())
-  inspect!(lca.query(c, d), content=a.to_string())
-  inspect!(lca.query(b, e), content=a.to_string())
-  inspect!(lca.query(b, d), content=a.to_string())
-  inspect!(lca.query(c, b), content=b.to_string())
+  let lca = Lca::new(graph, a)
+  inspect(lca.query(c, e), content=a.to_string())
+  inspect(lca.query(c, d), content=a.to_string())
+  inspect(lca.query(b, e), content=a.to_string())
+  inspect(lca.query(b, d), content=a.to_string())
+  inspect(lca.query(c, b), content=b.to_string())
 }

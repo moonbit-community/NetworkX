@@ -1,5 +1,5 @@
 ///|
-fn get_tuple[T](tuple : (T, T), index : Int) -> T {
+fn[T] get_tuple(tuple : (T, T), index : Int) -> T {
   if index == 0 {
     return tuple.0
   }
@@ -7,7 +7,7 @@ fn get_tuple[T](tuple : (T, T), index : Int) -> T {
 }
 
 ///|
-fn set_tuple[T](tuple : (T, T), index : Int, value : T) -> (T, T) {
+fn[T] set_tuple(tuple : (T, T), index : Int, value : T) -> (T, T) {
   if index == 0 {
     return (value, tuple.1)
   }

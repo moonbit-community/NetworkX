@@ -21,7 +21,7 @@ struct Dfs {
 /// let node_a = graph.add_node()
 /// let dfs = Dfs::new(graph, node_a)
 /// ```
-pub fn Dfs::new[N, E](graph : Graph[N, E], start : NodeIndex) -> Dfs {
+pub fn[N, E] Dfs::new(graph : Graph[N, E], start : NodeIndex) -> Dfs {
   Dfs::{ stack: [start], discovered: graph.visit_map() }
 }
 
@@ -37,19 +37,19 @@ pub fn VisitMap::new() -> VisitMap {
   VisitMap::{ visit: Array::new() }
 }
 
-///|
-fn VisitMap::op_set(self : VisitMap, node : NodeIndex, count : Bool) -> Unit {
-  self.visit[node.ix] = count
-}
+// ///|
+// fn VisitMap::op_set(self : VisitMap, node : NodeIndex, count : Bool) -> Unit {
+//   self.visit[node.ix] = count
+// }
 
-///|
-fn VisitMap::op_get(self : VisitMap, node : NodeIndex) -> Bool {
-  // match self.visit.get(node) {
-  //   Some(t) => t
-  //   None => false
-  // }
-  self.visit[node.ix]
-}
+// ///|
+// fn VisitMap::op_get(self : VisitMap, node : NodeIndex) -> Bool {
+//   // match self.visit.get(node) {
+//   //   Some(t) => t
+//   //   None => false
+//   // }
+//   self.visit[node.ix]
+// }
 
 ///|
 fn VisitMap::contain(self : VisitMap, nx : Int) -> Bool {
@@ -109,15 +109,15 @@ fn VisitMap::clear(self : VisitMap) -> Unit {
   self.clear()
 }
 
-///|
-fn VisitMap::grow(self : VisitMap, n : Int) -> Unit {
-  self.visit.resize(n, false)
-}
+// ///|
+// fn VisitMap::grow(self : VisitMap, n : Int) -> Unit {
+//   self.visit.resize(n, false)
+// }
 
-///| create an empty Dfs
-pub fn Dfs::empty[N, E](graph : Graph[N, E]) -> Dfs {
-  Dfs::{ stack: [], discovered: graph.visit_map() }
-}
+// ///| create an empty Dfs
+// pub fn Dfs::empty[N, E](graph : Graph[N, E]) -> Dfs {
+//   Dfs::{ stack: [], discovered: graph.visit_map() }
+// }
 
 ///|
 impl Default for Dfs with default() -> Dfs {
@@ -181,7 +181,7 @@ pub fn Dfs::move_to(self : Dfs, node : NodeIndex) -> Unit {
 /// inspect!(dfs.next(graph), content=Some(node_d).to_string())
 /// inspect!(dfs.next(graph), content="None")
 /// ```
-pub fn Dfs::next[N, E](self : Dfs, graph : Graph[N, E]) -> NodeIndex? {
+pub fn[N, E] Dfs::next(self : Dfs, graph : Graph[N, E]) -> NodeIndex? {
   while self.stack.pop() is Some(node) {
     if self.discovered.visit(node) {
       for succ in graph.neighbors(node) {
@@ -197,7 +197,7 @@ pub fn Dfs::next[N, E](self : Dfs, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Dfs::next" {
-  let graph = Graph::new()
+  let graph: Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -206,13 +206,13 @@ test "Dfs::next" {
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let dfs = Dfs::new(graph, node_a)
-  inspect!(dfs.next(graph), content=Some(node_a).to_string())
-  inspect!(dfs.next(graph), content=Some(node_b).to_string())
-  inspect!(dfs.next(graph), content=Some(node_c).to_string())
-  inspect!(dfs.next(graph), content=Some(node_d).to_string())
-  inspect!(dfs.next(graph), content="None")
+  inspect(dfs.next(graph), content=Some(node_a).to_string())
+  inspect(dfs.next(graph), content=Some(node_b).to_string())
+  inspect(dfs.next(graph), content=Some(node_c).to_string())
+  inspect(dfs.next(graph), content=Some(node_d).to_string())
+  inspect(dfs.next(graph), content="None")
   // empty the stack
-  inspect!(dfs.next(graph), content="None")
+  inspect(dfs.next(graph), content="None")
 }
 
 ///|
@@ -251,7 +251,7 @@ impl Default for DfsPostOrder with default() -> DfsPostOrder {
 /// ```
 /// let dfs_post = DfsPostOrder::new(graph, node_a)
 /// ```
-pub fn DfsPostOrder::new[N, E](
+pub fn[N, E] DfsPostOrder::new(
   graph : Graph[N, E],
   start : NodeIndex
 ) -> DfsPostOrder {
@@ -300,7 +300,7 @@ pub fn DfsPostOrder::move_to(self : DfsPostOrder, node : NodeIndex) -> Unit {
 /// inspect!(dfs_post.next(graph), content=Some(node_a).to_string())
 /// inspect!(dfs_post.next(graph), content="None")
 /// ```
-pub fn DfsPostOrder::next[N, E](
+pub fn[N, E] DfsPostOrder::next(
   self : DfsPostOrder,
   graph : Graph[N, E]
 ) -> NodeIndex? {
@@ -332,13 +332,13 @@ test "DfsPostOrder::next" {
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let dfs = DfsPostOrder::new(graph, node_a)
-  inspect!(dfs.next(graph), content=Some(node_d).to_string())
-  inspect!(dfs.next(graph), content=Some(node_c).to_string())
-  inspect!(dfs.next(graph), content=Some(node_b).to_string())
-  inspect!(dfs.next(graph), content=Some(node_a).to_string())
-  inspect!(dfs.next(graph), content="None")
+  inspect(dfs.next(graph), content=Some(node_d).to_string())
+  inspect(dfs.next(graph), content=Some(node_c).to_string())
+  inspect(dfs.next(graph), content=Some(node_b).to_string())
+  inspect(dfs.next(graph), content=Some(node_a).to_string())
+  inspect(dfs.next(graph), content="None")
   // empty the stack
-  inspect!(dfs.next(graph), content="None")
+  inspect(dfs.next(graph), content="None")
 }
 
 ///|
@@ -367,7 +367,7 @@ impl Default for Bfs with default() -> Bfs {
 /// ```
 /// let bfs = Bfs::new(graph, start_node)
 /// ```
-pub fn Bfs::new[N, E](graph : Graph[N, E], start : NodeIndex) -> Bfs {
+pub fn[N, E] Bfs::new(graph : Graph[N, E], start : NodeIndex) -> Bfs {
   let stack = @deque.new()
   stack.push_front(start)
   let discovered = graph.visit_map()
@@ -402,7 +402,7 @@ pub fn Bfs::new[N, E](graph : Graph[N, E], start : NodeIndex) -> Bfs {
 /// inspect!(bfs.next(graph), content=Some(node_c).to_string())
 /// inspect!(bfs.next(graph), content="None")
 /// ```
-pub fn Bfs::next[N, E](self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
+pub fn[N, E] Bfs::next(self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
   if self.stack.pop_front() is Some(node) {
     for succ in graph.neighbors(node) {
       if self.discovered.visit(succ) {
@@ -416,7 +416,7 @@ pub fn Bfs::next[N, E](self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Bfs::next" {
-  let graph = Graph::new()
+  let graph: Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -425,16 +425,16 @@ test "Bfs::next" {
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let bfs = Bfs::new(graph, node_a)
-  inspect!(bfs.next(graph), content=Some(node_a).to_string())
-  inspect!(bfs.next(graph), content=Some(node_b).to_string())
-  inspect!(bfs.next(graph), content=Some(node_c).to_string())
-  inspect!(bfs.next(graph), content=Some(node_d).to_string())
-  inspect!(bfs.next(graph), content="None")
+  inspect(bfs.next(graph), content=Some(node_a).to_string())
+  inspect(bfs.next(graph), content=Some(node_b).to_string())
+  inspect(bfs.next(graph), content=Some(node_c).to_string())
+  inspect(bfs.next(graph), content=Some(node_d).to_string())
+  inspect(bfs.next(graph), content="None")
 }
 
 ///|
 test "Bfs::next/multi" {
-  let graph = Graph::new()
+  let graph: Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -443,11 +443,11 @@ test "Bfs::next/multi" {
   graph.add_edge(node_a, node_b) |> ignore
   graph.add_edge(node_b, node_c) |> ignore
   let bfs = Bfs::new(graph, node_a)
-  inspect!(bfs.next(graph), content=Some(node_a).to_string())
-  inspect!(bfs.next(graph), content=Some(node_b).to_string())
-  inspect!(bfs.next(graph), content=Some(node_d).to_string())
-  inspect!(bfs.next(graph), content=Some(node_c).to_string())
-  inspect!(bfs.next(graph), content="None")
+  inspect(bfs.next(graph), content=Some(node_a).to_string())
+  inspect(bfs.next(graph), content=Some(node_b).to_string())
+  inspect(bfs.next(graph), content=Some(node_d).to_string())
+  inspect(bfs.next(graph), content=Some(node_c).to_string())
+  inspect(bfs.next(graph), content="None")
 }
 
 ///|
@@ -480,8 +480,8 @@ impl Default for Topo with default() -> Topo {
 /// ```
 /// let topo = Topo::new(graph)
 /// ```
-pub fn Topo::new[N, E](graph : Graph[N, E]) -> Topo {
-  let degrees = get_indegree(graph)
+pub fn[N, E] Topo::new(graph : Graph[N, E]) -> Topo {
+  let degrees = graph.get_indegree()
   let ordered = graph.visit_map()
   let tovisit = Array::new()
   for i in 0..<graph.node_count() {
@@ -493,7 +493,7 @@ pub fn Topo::new[N, E](graph : Graph[N, E]) -> Topo {
 }
 
 ///| Create an empty Topo instance.
-pub fn Topo::empty[N, E](graph : Graph[N, E]) -> Topo {
+pub fn[N, E] Topo::empty(graph : Graph[N, E]) -> Topo {
   Topo::{
     tovisit: Array::new(),
     ordered: graph.visit_map(),
@@ -530,7 +530,7 @@ pub fn Topo::empty[N, E](graph : Graph[N, E]) -> Topo {
 /// inspect!(topo.next(graph), content=Some(node_d).to_string())
 /// inspect!(topo.next(graph), content="None")
 /// ```
-pub fn Topo::next[N, E](self : Topo, graph : Graph[N, E]) -> NodeIndex? {
+pub fn[N, E] Topo::next(self : Topo, graph : Graph[N, E]) -> NodeIndex? {
   while self.tovisit.pop() is Some(node) {
     if self.ordered.is_visited(node) {
       continue
@@ -549,7 +549,7 @@ pub fn Topo::next[N, E](self : Topo, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Topo::next" {
-  let graph = Graph::new()
+  let graph: Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -558,16 +558,16 @@ test "Topo::next" {
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let topo = Topo::new(graph)
-  inspect!(topo.next(graph), content=Some(node_a).to_string())
-  inspect!(topo.next(graph), content=Some(node_b).to_string())
-  inspect!(topo.next(graph), content=Some(node_c).to_string())
-  inspect!(topo.next(graph), content=Some(node_d).to_string())
-  inspect!(topo.next(graph), content="None")
+  inspect(topo.next(graph), content=Some(node_a).to_string())
+  inspect(topo.next(graph), content=Some(node_b).to_string())
+  inspect(topo.next(graph), content=Some(node_c).to_string())
+  inspect(topo.next(graph), content=Some(node_d).to_string())
+  inspect(topo.next(graph), content="None")
 }
 
 ///|
 test "Topo::next/multi" {
-  let graph = Graph::new()
+  let graph: Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -578,15 +578,15 @@ test "Topo::next/multi" {
   graph.add_edge(node_c, node_a) |> ignore
   graph.add_edge(node_a, node_b) |> ignore
   let topo = Topo::new(graph)
-  inspect!(topo.next(graph), content=Some(node_c).to_string())
-  inspect!(topo.next(graph), content=Some(node_a).to_string())
-  inspect!(topo.next(graph), content=Some(node_b).to_string())
-  inspect!(topo.next(graph), content=Some(node_d).to_string())
-  inspect!(topo.next(graph), content="None")
+  inspect(topo.next(graph), content=Some(node_c).to_string())
+  inspect(topo.next(graph), content=Some(node_a).to_string())
+  inspect(topo.next(graph), content=Some(node_b).to_string())
+  inspect(topo.next(graph), content=Some(node_d).to_string())
+  inspect(topo.next(graph), content="None")
 }
 
 ///|
-fn get_indegree[N, E](self : Graph[N, E]) -> Array[Int] {
+fn[N, E] get_indegree(self : Graph[N, E]) -> Array[Int] {
   let deg = Array::make(self.node_count(), 0)
   for i in 0..<self.node_count() {
     let mut edix = self.nodes[i].next.0
@@ -600,7 +600,7 @@ fn get_indegree[N, E](self : Graph[N, E]) -> Array[Int] {
 
 ///|
 test "get_indegree" {
-  let graph = Graph::new()
+  let graph: Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -608,9 +608,9 @@ test "get_indegree" {
   graph.add_edge(node_a, node_b) |> ignore
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
-  let indeg = get_indegree(graph)
-  inspect!(indeg[node_a.ix], content="0")
-  inspect!(indeg[node_b.ix], content="1")
-  inspect!(indeg[node_c.ix], content="1")
-  inspect!(indeg[node_d.ix], content="1")
+  let indeg = graph.get_indegree()
+  inspect(indeg[node_a.ix], content="0")
+  inspect(indeg[node_b.ix], content="1")
+  inspect(indeg[node_c.ix], content="1")
+  inspect(indeg[node_d.ix], content="1")
 }
