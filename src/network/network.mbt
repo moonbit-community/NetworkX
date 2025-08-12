@@ -15,7 +15,7 @@ priv struct Node[N] {
   ix : NodeIndex
   weight : N
   mut next : (EdgeIndex, EdgeIndex)
-} derive(Show, Eq, Hash)
+} derive(Show)
 
 ///|
 struct Edge[E] {
@@ -84,7 +84,7 @@ pub fn[N : Default, E] Graph::try_add_node(
   let node_idx = NodeIndex::new(self.nodes.length())
   let node = Node::{
     ix: node_idx,
-    weight: weight.or(N::default()),
+    weight: weight.unwrap_or(N::default()),
     next: (EdgeIndex::end(), EdgeIndex::end()),
   }
   guard node_idx < NodeIndex::end() else {
@@ -113,7 +113,7 @@ priv enum Pair[T] {
 ///|
 fn[N, E] index_twice(self : Graph[N, E], a : Int, b : Int) -> Pair[Node[N]] {
   let nodes = self.nodes
-  if @math.maximum(a, b) >= nodes.length() {
+  if @cmp.maximum(a, b) >= nodes.length() {
     return None
   } else if a == b {
     return One(nodes[a])
@@ -160,7 +160,7 @@ pub fn[N, E : Default] Graph::try_add_edge(
   let edge_idx = EdgeIndex::new(self.edges.length(), NodeIndex::end(), -1)
   let edge = Edge::{
     ix: edge_idx,
-    weight: weight.or(E::default()),
+    weight: weight.unwrap_or(E::default()),
     next: (EdgeIndex::end(), EdgeIndex::end()),
     node: (a, b),
   }
