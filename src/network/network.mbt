@@ -329,7 +329,7 @@ pub fn[N, E] Graph::find_edge(
   a : NodeIndex,
   b : NodeIndex
 ) -> EdgeIndex? {
-  if not(self.directed) {
+  if !self.directed {
     self.find_edge_undirected(a, b)
   } else {
     match self.nodes.get(a.index()) {

@@ -61,7 +61,7 @@ impl VM for VisitMap with visit(self, node : NodeIndex) -> Bool {
   let nx = node.ix
   let res = self.contain(nx)
   self.visit[nx] = true
-  not(res)
+  !res
 }
 
 ///|
@@ -185,7 +185,7 @@ pub fn[N, E] Dfs::next(self : Dfs, graph : Graph[N, E]) -> NodeIndex? {
   while self.stack.pop() is Some(node) {
     if self.discovered.visit(node) {
       for succ in graph.neighbors(node) {
-        if not(self.discovered.is_visited(succ)) {
+        if !self.discovered.is_visited(succ) {
           self.stack.push(succ)
         }
       }
@@ -307,7 +307,7 @@ pub fn[N, E] DfsPostOrder::next(
   while self.stack.last() is Some(node) {
     if self.discovered.visit(node) {
       for succ in graph.neighbors(node) {
-        if not(self.discovered.is_visited(succ)) {
+        if !self.discovered.is_visited(succ) {
           self.stack.push(succ)
         }
       }

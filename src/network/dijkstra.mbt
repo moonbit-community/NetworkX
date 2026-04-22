@@ -24,7 +24,7 @@ pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   let dist = @hashmap.new()
   let q : @priority_queue.PriorityQueue[(E, NodeIndex)] = @priority_queue.new()
   q.push((E::default(), a))
-  while not(q.is_empty()) {
+  while !q.is_empty() {
     let (d, u) = q.pop().unwrap()
     if vis[u.index()] {
       continue
@@ -47,6 +47,5 @@ pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   }
   dist
 }
-
 
 
