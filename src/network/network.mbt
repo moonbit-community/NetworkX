@@ -1,21 +1,39 @@
 ///|
 struct NodeIndex {
   ix : Int
-} derive(Eq, Compare, Show, Hash)
+} derive(Eq, Compare, Debug, Hash)
 
 ///|
 struct EdgeIndex {
   ix : Int
   from : NodeIndex
   successor_index : Int
-} derive(Show, Eq, Hash)
+} derive(Debug, Eq, Hash)
+
+///|
+impl Show for NodeIndex with output(self, logger) -> Unit {
+  logger.write_string("{ix: ")
+  logger.write_object(self.ix)
+  logger.write_string("}")
+}
+
+///|
+impl Show for EdgeIndex with output(self, logger) -> Unit {
+  logger.write_string("{ix: ")
+  logger.write_object(self.ix)
+  logger.write_string(", from: ")
+  logger.write_object(self.from)
+  logger.write_string(", successor_index: ")
+  logger.write_object(self.successor_index)
+  logger.write_string("}")
+}
 
 ///|
 priv struct Node[N] {
   ix : NodeIndex
   weight : N
   mut next : (EdgeIndex, EdgeIndex)
-} derive(Show)
+} derive(Debug)
 
 ///|
 struct Edge[E] {
@@ -23,14 +41,14 @@ struct Edge[E] {
   weight : E
   mut next : (EdgeIndex, EdgeIndex)
   mut node : (NodeIndex, NodeIndex)
-} derive(Show, Eq, Hash)
+} derive(Debug, Eq, Hash)
 
 ///|
 struct Graph[N, E] {
   nodes : Array[Node[N]]
   edges : Array[Edge[E]]
   directed : Bool
-} derive(Show)
+} derive(Debug)
 
 ///|
 fn NodeIndex::end() -> NodeIndex {
@@ -111,7 +129,11 @@ priv enum Pair[T] {
 }
 
 ///|
-fn[N, E] index_twice(self : Graph[N, E], a : Int, b : Int) -> Pair[Node[N]] {
+fn[N, E] Graph::index_twice(
+  self : Graph[N, E],
+  a : Int,
+  b : Int
+) -> Pair[Node[N]] {
   let nodes = self.nodes
   if @cmp.maximum(a, b) >= nodes.length() {
     return None
@@ -220,12 +242,12 @@ test "add_edge/multi" {
 }
 
 ///|
-pub fn[N, E] node_count(self : Graph[N, E]) -> Int {
+pub fn[N, E] Graph::node_count(self : Graph[N, E]) -> Int {
   self.nodes.length()
 }
 
 ///|
-pub fn[N, E] edge_count(self : Graph[N, E]) -> Int {
+pub fn[N, E] Graph::edge_count(self : Graph[N, E]) -> Int {
   self.edges.length()
 }
 
@@ -235,7 +257,7 @@ pub fn[N, E] Graph::is_directed(self : Graph[N, E]) -> Bool {
 }
 
 ///|
-pub fn index(self : NodeIndex) -> Int {
+pub fn NodeIndex::index(self : NodeIndex) -> Int {
   self.ix
 }
 
@@ -302,7 +324,7 @@ test "edges" {
 /// ```
 /// let edge_idx = graph.find_edge(node_a, node_b)
 /// ```
-pub fn[N, E] find_edge(
+pub fn[N, E] Graph::find_edge(
   self : Graph[N, E],
   a : NodeIndex,
   b : NodeIndex
@@ -318,7 +340,7 @@ pub fn[N, E] find_edge(
 }
 
 ///|
-fn[N, E] find_edge_directed_from_node(
+fn[N, E] Graph::find_edge_directed_from_node(
   self : Graph[N, E],
   node : Node[N],
   b : NodeIndex
@@ -375,7 +397,7 @@ fn[E] Edge::node(self : Edge[E], index : Int) -> NodeIndex {
 /// ```
 /// let edge_idx = graph.find_edge_undirected(node_a, node_b)
 /// ```
-pub fn[N, E] find_edge_undirected(
+pub fn[N, E] Graph::find_edge_undirected(
   self : Graph[N, E],
   a : NodeIndex,
   b : NodeIndex
@@ -387,7 +409,7 @@ pub fn[N, E] find_edge_undirected(
 }
 
 ///|
-fn[N, E] find_edge_undirected_from_node(
+fn[N, E] Graph::find_edge_undirected_from_node(
   self : Graph[N, E],
   node : Node[N],
   b : NodeIndex
@@ -696,7 +718,7 @@ fn EdgeIndex::index(self : EdgeIndex) -> Int {
 }
 
 ///| 
-fn[N, E] directions(self : Graph[N, E]) -> Array[Int] {
+fn[N, E] Graph::directions(self : Graph[N, E]) -> Array[Int] {
   if self.directed {
     [0]
   } else {
@@ -716,7 +738,7 @@ fn[N, E] directions(self : Graph[N, E]) -> Array[Int] {
 ///
 /// - `Unit` : This function modifies the graph in place.
 ///
-fn[N, E] change_edge_links(
+fn[N, E] Graph::change_edge_links(
   self : Graph[N, E],
   edge_node : (NodeIndex, NodeIndex),
   e : EdgeIndex,
@@ -773,7 +795,10 @@ fn[N, E] change_edge_links(
 /// let edge = graph.add_edge(node_a, node_b, weight=10)
 /// inspect!(graph.remove_edge_adjust_indices(edge), content="Some(10)")
 /// ```
-fn[N, E] remove_edge_adjust_indices(self : Graph[N, E], e : EdgeIndex) -> E? {
+fn[N, E] Graph::remove_edge_adjust_indices(
+  self : Graph[N, E],
+  e : EdgeIndex
+) -> E? {
   let last_index = self.edges.length() - 1
   if e.index() != last_index {
     self.edges.swap(e.index(), last_index)
@@ -806,7 +831,7 @@ fn[N, E] remove_edge_adjust_indices(self : Graph[N, E], e : EdgeIndex) -> E? {
 /// let edge = graph.add_edge(node_a, node_b, weight=10)
 /// inspect!(graph.remove_edge(edge), content="Some(10)")
 /// ```
-pub fn[N, E] remove_edge(self : Graph[N, E], e : EdgeIndex) -> E? {
+pub fn[N, E] Graph::remove_edge(self : Graph[N, E], e : EdgeIndex) -> E? {
   let (edge_node, edge_next) = match self.edges.get(e.index()) {
     None => return None
     Some(x) => (x.node, x.next)
@@ -865,7 +890,7 @@ test "remove_edge/multi" {
 /// let node_a = graph.add_node(weight=1)
 /// inspect!(graph.remove_node(node_a), content="Some(1)")
 /// ```
-pub fn[N, E] remove_node(self : Graph[N, E], a : NodeIndex) -> N? {
+pub fn[N, E] Graph::remove_node(self : Graph[N, E], a : NodeIndex) -> N? {
   guard self.nodes.get(a.index()) is Some(_) else { return None }
   fn remove_chain(a : NodeIndex, k : Int) -> Unit {
     let next = self.nodes[a.index()].next(k)

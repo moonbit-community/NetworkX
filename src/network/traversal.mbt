@@ -586,7 +586,7 @@ test "Topo::next/multi" {
 }
 
 ///|
-fn[N, E] get_indegree(self : Graph[N, E]) -> Array[Int] {
+fn[N, E] Graph::get_indegree(self : Graph[N, E]) -> Array[Int] {
   let deg = Array::make(self.node_count(), 0)
   for i in 0..<self.node_count() {
     let mut edix = self.nodes[i].next.0

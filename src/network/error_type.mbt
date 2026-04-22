@@ -1,11 +1,11 @@
 ///|
-priv suberror NodeIxLimit String derive(Show)
+priv suberror NodeIxLimit { NodeIxLimit(String) } derive(Debug)
 
 ///|
-priv suberror NodeOutBounds String derive(Show)
+priv suberror NodeOutBounds { NodeOutBounds(String) } derive(Debug)
 
 ///|
-priv suberror NodeNotFound String derive(Show)
+priv suberror NodeNotFound { NodeNotFound(String) } derive(Debug)
 
 ///|
-suberror CycleDetected String derive(Show)
+suberror CycleDetected { CycleDetected(String) } derive(Debug)
