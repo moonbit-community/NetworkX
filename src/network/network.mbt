@@ -89,8 +89,8 @@ pub fn[N : Default, E] Graph::add_node(
   weight? : N
 ) -> NodeIndex {
   match weight {
-    Some(w) => (try? self.try_add_node(weight=w)).unwrap()
-    None => (try? self.try_add_node()).unwrap()
+    Some(w) => (try! self.try_add_node(weight=w))
+    None => (try! self.try_add_node())
   }
 }
 
@@ -167,8 +167,8 @@ pub fn[N, E : Default] Graph::add_edge(
   weight? : E
 ) -> EdgeIndex {
   match weight {
-    Some(w) => (try? self.try_add_edge(a, b, weight=w)).unwrap()
-    None => (try? self.try_add_edge(a, b)).unwrap()
+    Some(w) => (try! self.try_add_edge(a, b, weight=w))
+    None => (try! self.try_add_edge(a, b))
   }
 }
 
