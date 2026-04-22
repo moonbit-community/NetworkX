@@ -1,12 +1,12 @@
 ///|
 test "Graph::new" {
-  struct weight {
+  struct Weight {
     // value : Int
     // unit : String
   } derive(Default)
-  let graph : @network.Graph[weight, Unit] = Graph::new()
-  // graph.add_node(weight=weight::{ value: 1, unit: "kg" }) |> ignore
-  graph.add_node(weight=weight::{  }) |> ignore
+  let graph : @network.Graph[Weight, Unit] = Graph::new()
+  // graph.add_node(weight=Weight::{ value: 1, unit: "kg" }) |> ignore
+  graph.add_node(weight=Weight::{  }) |> ignore
 }
 
 ///|
