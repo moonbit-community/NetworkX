@@ -4,7 +4,8 @@ struct Dfs {
   discovered : VisitMap
 }
 
-///| Create a new Depth-First Search (DFS) instance starting from a given node.
+///|
+/// Create a new Depth-First Search (DFS) instance starting from a given node.
 ///
 /// Parameters
 ///
@@ -31,7 +32,8 @@ struct VisitMap {
   visit : Array[Bool]
 }
 
-///| create a new VisitMap
+///|
+/// create a new VisitMap
 pub fn VisitMap::new() -> VisitMap {
   // VisitMap::{ visit: @hashmap.new() }
   VisitMap::{ visit: Array::new() }
@@ -114,7 +116,8 @@ impl[N, E] Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
 //   Dfs::{ stack: [], discovered: graph.visit_map() }
 // }
 
-///| Create a new Depth-First Search (DFS) instance from given parts.
+///|
+/// Create a new Depth-First Search (DFS) instance from given parts.
 ///
 /// Parameters
 ///
@@ -133,20 +136,23 @@ pub fn Dfs::from_parts(stack : Array[NodeIndex], discovered : VisitMap) -> Dfs {
   Dfs::{ stack, discovered }
 }
 
-///| reset the dfs
+///|
+/// reset the dfs
 pub fn Dfs::reset(self : Dfs) -> Unit {
   self.stack.clear()
   self.discovered.visit.clear()
 }
 
-///| Keep the discovered map, but clear the visit stack and
+///|
+/// Keep the discovered map, but clear the visit stack and
 /// restart the dfs from a particular node.
 pub fn Dfs::move_to(self : Dfs, node : NodeIndex) -> Unit {
   self.stack.clear()
   self.stack.push(node)
 }
 
-///| Perform the next step in the Depth-First Search (DFS) traversal.
+///|
+/// Perform the next step in the Depth-First Search (DFS) traversal.
 ///
 /// Parameters
 ///
@@ -187,7 +193,7 @@ pub fn[N, E] Dfs::next(self : Dfs, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Dfs::next" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -212,7 +218,8 @@ struct DfsPostOrder {
   finished : VisitMap
 }
 
-///| Create a new Depth-First Search (DFS) Post-Order instance starting from a given node.
+///|
+/// Create a new Depth-First Search (DFS) Post-Order instance starting from a given node.
 ///
 /// Parameters
 ///
@@ -229,7 +236,7 @@ struct DfsPostOrder {
 /// ```
 pub fn[N, E] DfsPostOrder::new(
   graph : Graph[N, E],
-  start : NodeIndex
+  start : NodeIndex,
 ) -> DfsPostOrder {
   DfsPostOrder::{
     stack: [start],
@@ -238,21 +245,24 @@ pub fn[N, E] DfsPostOrder::new(
   }
 }
 
-///| reset the DfsPostOrder
+///|
+/// reset the DfsPostOrder
 pub fn DfsPostOrder::reset(self : DfsPostOrder) -> Unit {
   self.stack.clear()
   self.discovered.visit.clear()
   self.finished.visit.clear()
 }
 
-///| Keep the discovered map, but clear the visit stack and
+///|
+/// Keep the discovered map, but clear the visit stack and
 /// restart the dfs from a particular node.
 pub fn DfsPostOrder::move_to(self : DfsPostOrder, node : NodeIndex) -> Unit {
   self.stack.clear()
   self.stack.push(node)
 }
 
-///| Perform the next step in the Depth-First Search (DFS) Post-Order traversal.
+///|
+/// Perform the next step in the Depth-First Search (DFS) Post-Order traversal.
 ///
 /// Parameters
 ///
@@ -278,7 +288,7 @@ pub fn DfsPostOrder::move_to(self : DfsPostOrder, node : NodeIndex) -> Unit {
 /// ```
 pub fn[N, E] DfsPostOrder::next(
   self : DfsPostOrder,
-  graph : Graph[N, E]
+  graph : Graph[N, E],
 ) -> NodeIndex? {
   while self.stack.last() is Some(node) {
     if self.discovered.visit(node) {
@@ -323,7 +333,8 @@ struct Bfs {
   discovered : VisitMap
 }
 
-///| Create a new Breadth-First Search (BFS) instance starting from a given node.
+///|
+/// Create a new Breadth-First Search (BFS) instance starting from a given node.
 ///
 /// Parameters
 ///
@@ -346,7 +357,8 @@ pub fn[N, E] Bfs::new(graph : Graph[N, E], start : NodeIndex) -> Bfs {
   Bfs::{ stack, discovered }
 }
 
-///| Perform the next step in the Breadth-First Search (BFS) traversal.
+///|
+/// Perform the next step in the Breadth-First Search (BFS) traversal.
 ///
 /// Parameters
 ///
@@ -387,7 +399,7 @@ pub fn[N, E] Bfs::next(self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Bfs::next" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -405,7 +417,7 @@ test "Bfs::next" {
 
 ///|
 test "Bfs::next/multi" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -428,7 +440,8 @@ struct Topo {
   degrees : Array[Int]
 }
 
-///| Create a new Topological Sort (Topo) instance for a given graph.
+///|
+/// Create a new Topological Sort (Topo) instance for a given graph.
 ///
 /// Parameters
 ///
@@ -454,7 +467,8 @@ pub fn[N, E] Topo::new(graph : Graph[N, E]) -> Topo {
   Topo::{ tovisit, ordered, degrees }
 }
 
-///| Create an empty Topo instance.
+///|
+/// Create an empty Topo instance.
 pub fn[N, E] Topo::empty(graph : Graph[N, E]) -> Topo {
   Topo::{
     tovisit: Array::new(),
@@ -463,7 +477,8 @@ pub fn[N, E] Topo::empty(graph : Graph[N, E]) -> Topo {
   }
 }
 
-///| Perform the next step in the Topological Sort (Topo) traversal.
+///|
+/// Perform the next step in the Topological Sort (Topo) traversal.
 ///
 /// Parameters
 ///
@@ -511,7 +526,7 @@ pub fn[N, E] Topo::next(self : Topo, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Topo::next" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -529,7 +544,7 @@ test "Topo::next" {
 
 ///|
 test "Topo::next/multi" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -562,7 +577,7 @@ fn[N, E] Graph::get_indegree(self : Graph[N, E]) -> Array[Int] {
 
 ///|
 test "get_indegree" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()

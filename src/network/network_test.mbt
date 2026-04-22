@@ -34,7 +34,7 @@ test "remove_node" {
 
 ///|
 test "remove_node/empty" {
-  let g: @network.Graph[Int, Unit] = Graph::new()
+  let g : @network.Graph[Int, Unit] = Graph::new()
   let node_a = g.add_node(weight=0)
   inspect(g.node_count(), content="1")
   inspect(g.remove_node(node_a), content="Some(0)")

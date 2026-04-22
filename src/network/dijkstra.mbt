@@ -1,4 +1,5 @@
-///| Compute the shortest paths from a starting node to all other nodes using Dijkstra's algorithm.
+///|
+/// Compute the shortest paths from a starting node to all other nodes using Dijkstra's algorithm.
 ///
 /// Parameters
 ///
@@ -14,7 +15,7 @@
 /// ```
 pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   self : Graph[N, E],
-  a : NodeIndex
+  a : NodeIndex,
 ) -> @hashmap.HashMap[NodeIndex, E] raise {
   guard self.nodes.get(a.index()) is Some(_) else {
     raise NodeNotFound("Node not found")
@@ -47,5 +48,3 @@ pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   }
   dist
 }
-
-
