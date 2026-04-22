@@ -6,7 +6,7 @@
 ///
 /// Returns
 ///
-/// - `@hashmap.T[NodeIndex, E]!` : A hashmap containing the shortest distances from the starting node to all reachable nodes.
+/// - `@hashmap.HashMap[NodeIndex, E]!` : A hashmap containing the shortest distances from the starting node to all reachable nodes.
 ///
 /// Example
 /// ```
@@ -15,14 +15,14 @@
 pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   self : Graph[N, E],
   a : NodeIndex
-) -> @hashmap.T[NodeIndex, E] raise {
+) -> @hashmap.HashMap[NodeIndex, E] raise {
   guard self.nodes.get(a.index()) is Some(_) else {
     raise NodeNotFound("Node not found")
   }
   let nodes_count = self.node_count()
   let vis = Array::make(nodes_count, false)
   let dist = @hashmap.new()
-  let q : @priority_queue.T[(E, NodeIndex)] = @priority_queue.new()
+  let q : @priority_queue.PriorityQueue[(E, NodeIndex)] = @priority_queue.new()
   q.push((E::default(), a))
   while not(q.is_empty()) {
     let (d, u) = q.pop().unwrap()
@@ -47,7 +47,6 @@ pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   }
   dist
 }
-
 
 
 

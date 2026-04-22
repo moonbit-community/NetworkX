@@ -52,7 +52,7 @@ struct Graph[N, E] {
 
 ///|
 fn NodeIndex::end() -> NodeIndex {
-  NodeIndex::{ ix: @int.max_value }
+  NodeIndex::{ ix: @int.MAX_VALUE }
 }
 
 ///|
@@ -63,9 +63,9 @@ fn NodeIndex::new(ix : Int) -> NodeIndex {
 ///|
 fn EdgeIndex::end() -> EdgeIndex {
   EdgeIndex::{
-    ix: @int.max_value,
+    ix: @int.MAX_VALUE,
     from: NodeIndex::end(),
-    successor_index: @int.max_value,
+    successor_index: @int.MAX_VALUE,
   }
 }
 
@@ -135,7 +135,7 @@ fn[N, E] Graph::index_twice(
   b : Int
 ) -> Pair[Node[N]] {
   let nodes = self.nodes
-  if @cmp.maximum(a, b) >= nodes.length() {
+  if Int::max(a, b) >= nodes.length() {
     return None
   } else if a == b {
     return One(nodes[a])
@@ -536,7 +536,7 @@ pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges(
   self : Graph[N, E],
   iterable : Iter[(N, N)]
 ) -> Unit {
-  let mp : @hashmap.T[N, NodeIndex] = @hashmap.new()
+  let mp : @hashmap.HashMap[N, NodeIndex] = @hashmap.new()
   for node in self.nodes {
     mp[node.weight] = node.ix
   }
@@ -612,7 +612,7 @@ pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges_with_weigh
   self : Graph[N, E],
   iterable : Iter[(N, N, E)]
 ) -> Unit {
-  let mp : @hashmap.T[N, NodeIndex] = @hashmap.new()
+  let mp : @hashmap.HashMap[N, NodeIndex] = @hashmap.new()
   for elt in iterable {
     let (a, b, w) = elt
     let a_idx = mp.get_or_init(a, fn() {

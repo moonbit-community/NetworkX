@@ -343,7 +343,7 @@ test "DfsPostOrder::next" {
 
 ///|
 struct Bfs {
-  stack : @deque.T[NodeIndex]
+  stack : @deque.Deque[NodeIndex]
   discovered : VisitMap
 }
 
