@@ -104,11 +104,6 @@ impl[N, E] Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
 //   map.grow(self.node_count())
 // }
 
-///|
-fn VisitMap::clear(self : VisitMap) -> Unit {
-  self.clear()
-}
-
 // ///|
 // fn VisitMap::grow(self : VisitMap, n : Int) -> Unit {
 //   self.visit.resize(n, false)
@@ -118,11 +113,6 @@ fn VisitMap::clear(self : VisitMap) -> Unit {
 // pub fn Dfs::empty[N, E](graph : Graph[N, E]) -> Dfs {
 //   Dfs::{ stack: [], discovered: graph.visit_map() }
 // }
-
-///|
-impl Default for Dfs with default() -> Dfs {
-  Dfs::{ stack: [], discovered: VisitMap::default() }
-}
 
 ///| Create a new Depth-First Search (DFS) instance from given parts.
 ///
@@ -220,20 +210,6 @@ struct DfsPostOrder {
   stack : Array[NodeIndex]
   discovered : VisitMap
   finished : VisitMap
-}
-
-///|
-impl Default for VisitMap with default() -> VisitMap {
-  VisitMap::{ visit: Array::new() }
-}
-
-///|
-impl Default for DfsPostOrder with default() -> DfsPostOrder {
-  DfsPostOrder::{
-    stack: [],
-    discovered: VisitMap::default(),
-    finished: VisitMap::default(),
-  }
 }
 
 ///| Create a new Depth-First Search (DFS) Post-Order instance starting from a given node.
@@ -347,11 +323,6 @@ struct Bfs {
   discovered : VisitMap
 }
 
-///|
-impl Default for Bfs with default() -> Bfs {
-  Bfs::{ stack: @deque.new(), discovered: VisitMap::default() }
-}
-
 ///| Create a new Breadth-First Search (BFS) instance starting from a given node.
 ///
 /// Parameters
@@ -455,15 +426,6 @@ struct Topo {
   tovisit : Array[NodeIndex]
   ordered : VisitMap
   degrees : Array[Int]
-}
-
-///|
-impl Default for Topo with default() -> Topo {
-  Topo::{
-    tovisit: Array::new(),
-    ordered: VisitMap::default(),
-    degrees: Array::new(),
-  }
 }
 
 ///| Create a new Topological Sort (Topo) instance for a given graph.
