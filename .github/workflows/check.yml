@@ -30,7 +30,7 @@ jobs:
       - name: moon check
         run: |
           moon update
-          moon check --deny-warn
+          moon check --target all --deny-warn
 
       - name: moon info
         run: |
@@ -41,10 +41,6 @@ jobs:
         run: |
           moon fmt
           git diff --exit-code
-
-      - name: Set ulimit
-        run: |
-          ulimit -s 8176
 
       - name: moon test
         run: |
