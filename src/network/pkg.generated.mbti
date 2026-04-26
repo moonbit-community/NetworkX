@@ -1,0 +1,79 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "smallbearrr/NetworkX/network"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/hashmap",
+}
+
+// Values
+
+// Errors
+type CycleDetected derive(@debug.Debug)
+
+// Types and methods
+type Bfs
+pub fn[N, E] Bfs::new(Graph[N, E], NodeIndex) -> Self
+pub fn[N, E] Bfs::next(Self, Graph[N, E]) -> NodeIndex?
+
+type Dfs
+pub fn Dfs::from_parts(Array[NodeIndex], VisitMap) -> Self
+pub fn Dfs::move_to(Self, NodeIndex) -> Unit
+pub fn[N, E] Dfs::new(Graph[N, E], NodeIndex) -> Self
+pub fn[N, E] Dfs::next(Self, Graph[N, E]) -> NodeIndex?
+pub fn Dfs::reset(Self) -> Unit
+
+type DfsPostOrder
+pub fn DfsPostOrder::move_to(Self, NodeIndex) -> Unit
+pub fn[N, E] DfsPostOrder::new(Graph[N, E], NodeIndex) -> Self
+pub fn[N, E] DfsPostOrder::next(Self, Graph[N, E]) -> NodeIndex?
+pub fn DfsPostOrder::reset(Self) -> Unit
+
+type Edge[E] derive(Eq, Hash, @debug.Debug)
+
+type EdgeIndex derive(Eq, Hash, @debug.Debug)
+
+type Graph[N, E] derive(@debug.Debug)
+pub fn[N, E : Default] Graph::add_edge(Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex
+pub fn[N : Default, E] Graph::add_node(Self[N, E], weight? : N) -> NodeIndex
+pub fn[N, E] Graph::capacity(Self[N, E]) -> (Int, Int)
+pub fn[N, E : Compare + Add + Default] Graph::dijkstra(Self[N, E], NodeIndex) -> @hashmap.HashMap[NodeIndex, E] raise
+pub fn[N, E] Graph::edge_count(Self[N, E]) -> Int
+pub fn[N, E : Eq + Hash] Graph::edges(Self[N, E], NodeIndex) -> Iter[Edge[E]]
+pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges(Self[N, E], Iter[(N, N)]) -> Unit
+pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges_with_weights(Self[N, E], Iter[(N, N, E)]) -> Unit
+pub fn[N, E] Graph::find_edge(Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
+pub fn[N, E] Graph::find_edge_undirected(Self[N, E], NodeIndex, NodeIndex) -> EdgeIndex?
+pub fn[N : Default + Eq + Hash, E : Default] Graph::from_edges(Iter[(N, N)], directed? : Bool) -> Self[N, E]
+pub fn[N : Default + Eq + Hash, E : Default] Graph::from_edges_with_weights(Iter[(N, N, E)], directed? : Bool) -> Self[N, E]
+pub fn[N, E] Graph::is_cyclic(Self[N, E]) -> Bool
+pub fn[N, E] Graph::is_directed(Self[N, E]) -> Bool
+pub fn[N, E] Graph::neighbors(Self[N, E], NodeIndex) -> Iter[NodeIndex]
+pub fn[N, E] Graph::new(directed? : Bool) -> Self[N, E]
+pub fn[N, E] Graph::node_count(Self[N, E]) -> Int
+pub fn[N, E] Graph::remove_edge(Self[N, E], EdgeIndex) -> E?
+pub fn[N, E] Graph::remove_node(Self[N, E], NodeIndex) -> N?
+pub fn[N, E : Default] Graph::try_add_edge(Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex raise
+pub fn[N : Default, E] Graph::try_add_node(Self[N, E], weight? : N) -> NodeIndex raise
+pub fn[N, E] Graph::with_capacity(Int, Int, directed? : Bool) -> Self[N, E]
+
+type Lca[N, E]
+pub fn[N, E] Lca::new(Graph[N, E], NodeIndex) -> Self[N, E] raise CycleDetected
+pub fn[N, E] Lca::query(Self[N, E], NodeIndex, NodeIndex) -> NodeIndex
+pub fn[N, E] Lca::reset(Self[N, E], root? : NodeIndex) -> Unit
+
+type NodeIndex derive(Compare, Eq, Hash, @debug.Debug)
+pub fn NodeIndex::index(Self) -> Int
+
+type Topo
+pub fn[N, E] Topo::empty(Graph[N, E]) -> Self
+pub fn[N, E] Topo::new(Graph[N, E]) -> Self
+pub fn[N, E] Topo::next(Self, Graph[N, E]) -> NodeIndex?
+
+type VisitMap
+pub fn VisitMap::new() -> Self
+
+// Type aliases
+
+// Traits
+

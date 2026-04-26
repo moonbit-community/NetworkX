@@ -1,21 +1,39 @@
 ///|
 struct NodeIndex {
   ix : Int
-} derive(Eq, Compare, Show, Hash)
+} derive(Eq, Compare, Debug, Hash)
 
 ///|
 struct EdgeIndex {
   ix : Int
   from : NodeIndex
   successor_index : Int
-} derive(Show, Eq, Hash)
+} derive(Debug, Eq, Hash)
+
+///|
+impl Show for NodeIndex with output(self, logger) -> Unit {
+  logger.write_string("{ix: ")
+  logger.write_object(self.ix)
+  logger.write_string("}")
+}
+
+///|
+impl Show for EdgeIndex with output(self, logger) -> Unit {
+  logger.write_string("{ix: ")
+  logger.write_object(self.ix)
+  logger.write_string(", from: ")
+  logger.write_object(self.from)
+  logger.write_string(", successor_index: ")
+  logger.write_object(self.successor_index)
+  logger.write_string("}")
+}
 
 ///|
 priv struct Node[N] {
   ix : NodeIndex
   weight : N
   mut next : (EdgeIndex, EdgeIndex)
-} derive(Show)
+} derive(Debug)
 
 ///|
 struct Edge[E] {
@@ -23,18 +41,18 @@ struct Edge[E] {
   weight : E
   mut next : (EdgeIndex, EdgeIndex)
   mut node : (NodeIndex, NodeIndex)
-} derive(Show, Eq, Hash)
+} derive(Debug, Eq, Hash)
 
 ///|
 struct Graph[N, E] {
   nodes : Array[Node[N]]
   edges : Array[Edge[E]]
   directed : Bool
-} derive(Show)
+} derive(Debug)
 
 ///|
 fn NodeIndex::end() -> NodeIndex {
-  NodeIndex::{ ix: @int.max_value }
+  NodeIndex::{ ix: @int.MAX_VALUE }
 }
 
 ///|
@@ -45,9 +63,9 @@ fn NodeIndex::new(ix : Int) -> NodeIndex {
 ///|
 fn EdgeIndex::end() -> EdgeIndex {
   EdgeIndex::{
-    ix: @int.max_value,
+    ix: @int.MAX_VALUE,
     from: NodeIndex::end(),
-    successor_index: @int.max_value,
+    successor_index: @int.MAX_VALUE,
   }
 }
 
@@ -55,31 +73,34 @@ fn EdgeIndex::end() -> EdgeIndex {
 fn EdgeIndex::new(
   ix : Int,
   from : NodeIndex,
-  successor_index : Int
+  successor_index : Int,
 ) -> EdgeIndex {
   EdgeIndex::{ ix, from, successor_index }
 }
 
-///| Create a new Graph with directed edges.
-pub fn[N, E] Graph::new(directed~ : Bool = true) -> Graph[N, E] {
+///|
+/// Create a new Graph with directed edges.
+pub fn[N, E] Graph::new(directed? : Bool = true) -> Graph[N, E] {
   Graph::{ nodes: [], edges: [], directed }
 }
 
-///| Add a node (also called vertex) with associated data weight to the graph
+///|
+/// Add a node (also called vertex) with associated data weight to the graph
 pub fn[N : Default, E] Graph::add_node(
   self : Graph[N, E],
-  weight? : N
+  weight? : N,
 ) -> NodeIndex {
   match weight {
-    Some(w) => (try? self.try_add_node(weight=w)).unwrap()
-    None => (try? self.try_add_node()).unwrap()
+    Some(w) => try! self.try_add_node(weight=w)
+    None => try! self.try_add_node()
   }
 }
 
-///| Add a node (also called vertex) with associated data weight to the graph
+///|
+/// Add a node (also called vertex) with associated data weight to the graph
 pub fn[N : Default, E] Graph::try_add_node(
   self : Graph[N, E],
-  weight? : N
+  weight? : N,
 ) -> NodeIndex raise {
   let node_idx = NodeIndex::new(self.nodes.length())
   let node = Node::{
@@ -96,7 +117,7 @@ pub fn[N : Default, E] Graph::try_add_node(
 
 ///|
 test "add_node" {
-  let graph: Graph[Int, Unit] = Graph::new()
+  let graph : Graph[Int, Unit] = Graph::new()
   let node_idx = graph.add_node(weight=0)
   inspect(node_idx.ix, content="0")
   let node_idx = graph.add_node()
@@ -111,9 +132,13 @@ priv enum Pair[T] {
 }
 
 ///|
-fn[N, E] index_twice(self : Graph[N, E], a : Int, b : Int) -> Pair[Node[N]] {
+fn[N, E] Graph::index_twice(
+  self : Graph[N, E],
+  a : Int,
+  b : Int,
+) -> Pair[Node[N]] {
   let nodes = self.nodes
-  if @cmp.maximum(a, b) >= nodes.length() {
+  if Int::max(a, b) >= nodes.length() {
     return None
   } else if a == b {
     return One(nodes[a])
@@ -122,7 +147,8 @@ fn[N, E] index_twice(self : Graph[N, E], a : Int, b : Int) -> Pair[Node[N]] {
   }
 }
 
-///| Add an edge from node `a` to node `b` in the graph, with an optional weight.
+///|
+/// Add an edge from node `a` to node `b` in the graph, with an optional weight.
 ///
 /// Parameters
 ///
@@ -142,20 +168,21 @@ pub fn[N, E : Default] Graph::add_edge(
   self : Graph[N, E],
   a : NodeIndex,
   b : NodeIndex,
-  weight? : E
+  weight? : E,
 ) -> EdgeIndex {
   match weight {
-    Some(w) => (try? self.try_add_edge(a, b, weight=w)).unwrap()
-    None => (try? self.try_add_edge(a, b)).unwrap()
+    Some(w) => try! self.try_add_edge(a, b, weight=w)
+    None => try! self.try_add_edge(a, b)
   }
 }
 
-///| Add an edge from a to b to the graph, with its associated data weight
+///|
+/// Add an edge from a to b to the graph, with its associated data weight
 pub fn[N, E : Default] Graph::try_add_edge(
   self : Graph[N, E],
   a : NodeIndex,
   b : NodeIndex,
-  weight? : E
+  weight? : E,
 ) -> EdgeIndex raise {
   let edge_idx = EdgeIndex::new(self.edges.length(), NodeIndex::end(), -1)
   let edge = Edge::{
@@ -220,12 +247,12 @@ test "add_edge/multi" {
 }
 
 ///|
-pub fn[N, E] node_count(self : Graph[N, E]) -> Int {
+pub fn[N, E] Graph::node_count(self : Graph[N, E]) -> Int {
   self.nodes.length()
 }
 
 ///|
-pub fn[N, E] edge_count(self : Graph[N, E]) -> Int {
+pub fn[N, E] Graph::edge_count(self : Graph[N, E]) -> Int {
   self.edges.length()
 }
 
@@ -235,16 +262,18 @@ pub fn[N, E] Graph::is_directed(self : Graph[N, E]) -> Bool {
 }
 
 ///|
-pub fn index(self : NodeIndex) -> Int {
+pub fn NodeIndex::index(self : NodeIndex) -> Int {
   self.ix
 }
 
-///| return the capacity of the graph (nodes and edges)
+///|
+/// return the capacity of the graph (nodes and edges)
 pub fn[N, E] Graph::capacity(self : Graph[N, E]) -> (Int, Int) {
   (self.nodes.capacity(), self.edges.capacity())
 }
 
-///| Retrieve all edges connected to a given node in the graph.
+///|
+/// Retrieve all edges connected to a given node in the graph.
 ///
 /// Parameters
 ///
@@ -260,7 +289,7 @@ pub fn[N, E] Graph::capacity(self : Graph[N, E]) -> (Int, Int) {
 /// ```
 pub fn[N, E : Eq + Hash] Graph::edges(
   self : Graph[N, E],
-  node : NodeIndex
+  node : NodeIndex,
 ) -> Iter[Edge[E]] {
   let edges = @hashset.new()
   for i in 0..<(2 - self.directed.to_int()) {
@@ -275,7 +304,7 @@ pub fn[N, E : Eq + Hash] Graph::edges(
 
 ///|
 test "edges" {
-  let graph: Graph[Unit, Unit] = Graph::new(directed=false)
+  let graph : Graph[Unit, Unit] = Graph::new(directed=false)
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -287,7 +316,8 @@ test "edges" {
   inspect(edges.contains(graph.edges[1]), content="true")
 }
 
-///| Find an edge between two nodes in the graph.
+///|
+/// Find an edge between two nodes in the graph.
 ///
 /// Parameters
 ///
@@ -302,12 +332,12 @@ test "edges" {
 /// ```
 /// let edge_idx = graph.find_edge(node_a, node_b)
 /// ```
-pub fn[N, E] find_edge(
+pub fn[N, E] Graph::find_edge(
   self : Graph[N, E],
   a : NodeIndex,
-  b : NodeIndex
+  b : NodeIndex,
 ) -> EdgeIndex? {
-  if not(self.directed) {
+  if !self.directed {
     self.find_edge_undirected(a, b)
   } else {
     match self.nodes.get(a.index()) {
@@ -318,10 +348,10 @@ pub fn[N, E] find_edge(
 }
 
 ///|
-fn[N, E] find_edge_directed_from_node(
+fn[N, E] Graph::find_edge_directed_from_node(
   self : Graph[N, E],
   node : Node[N],
-  b : NodeIndex
+  b : NodeIndex,
 ) -> EdgeIndex? {
   let mut edix = node.next.0
   while self.edges.get(edix.ix) is Some(edge) {
@@ -360,7 +390,8 @@ fn[E] Edge::node(self : Edge[E], index : Int) -> NodeIndex {
   }
 }
 
-///| Find an edge between two nodes in an undirected graph.
+///|
+/// Find an edge between two nodes in an undirected graph.
 ///
 /// Parameters
 ///
@@ -375,10 +406,10 @@ fn[E] Edge::node(self : Edge[E], index : Int) -> NodeIndex {
 /// ```
 /// let edge_idx = graph.find_edge_undirected(node_a, node_b)
 /// ```
-pub fn[N, E] find_edge_undirected(
+pub fn[N, E] Graph::find_edge_undirected(
   self : Graph[N, E],
   a : NodeIndex,
-  b : NodeIndex
+  b : NodeIndex,
 ) -> EdgeIndex? {
   match self.nodes.get(a.index()) {
     None => None
@@ -387,10 +418,10 @@ pub fn[N, E] find_edge_undirected(
 }
 
 ///|
-fn[N, E] find_edge_undirected_from_node(
+fn[N, E] Graph::find_edge_undirected_from_node(
   self : Graph[N, E],
   node : Node[N],
-  b : NodeIndex
+  b : NodeIndex,
 ) -> EdgeIndex? {
   for i in 0..<2 {
     let mut edix = node.next(i)
@@ -425,7 +456,8 @@ test "find_edge/undirected" {
   )
 }
 
-///| Get all neighbors of a given node in the graph.
+///|
+/// Get all neighbors of a given node in the graph.
 ///
 /// Parameters
 ///
@@ -441,7 +473,7 @@ test "find_edge/undirected" {
 /// ```
 pub fn[N, E] Graph::neighbors(
   self : Graph[N, E],
-  node : NodeIndex
+  node : NodeIndex,
 ) -> Iter[NodeIndex] {
   let mut res : Iter[NodeIndex] = Iter::empty()
   let mut edix = self.nodes[node.index()].next.0
@@ -454,7 +486,7 @@ pub fn[N, E] Graph::neighbors(
 
 ///|
 test "neighbors" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -466,7 +498,8 @@ test "neighbors" {
   inspect(nb.contains(node_c), content="true")
 }
 
-///| Create a new graph with specified capacities for nodes and edges.
+///|
+/// Create a new graph with specified capacities for nodes and edges.
 ///
 /// Parameters
 ///
@@ -485,7 +518,7 @@ test "neighbors" {
 pub fn[N, E] Graph::with_capacity(
   nodes_capacity : Int,
   edges_capacity : Int,
-  directed~ : Bool = true
+  directed? : Bool = true,
 ) -> Graph[N, E] {
   Graph::{
     nodes: Array::new(capacity=nodes_capacity),
@@ -494,7 +527,8 @@ pub fn[N, E] Graph::with_capacity(
   }
 }
 
-///| Extend the graph by adding edges from an iterable of node pairs.
+///|
+/// Extend the graph by adding edges from an iterable of node pairs.
 ///  (N, N) is weighted of node pairs, the same weight are considered the same point!
 ///
 /// Parameters
@@ -512,9 +546,9 @@ pub fn[N, E] Graph::with_capacity(
 /// ```
 pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges(
   self : Graph[N, E],
-  iterable : Iter[(N, N)]
+  iterable : Iter[(N, N)],
 ) -> Unit {
-  let mp : @hashmap.T[N, NodeIndex] = @hashmap.new()
+  let mp : @hashmap.HashMap[N, NodeIndex] = @hashmap.new()
   for node in self.nodes {
     mp[node.weight] = node.ix
   }
@@ -534,7 +568,8 @@ pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges(
   }
 }
 
-///| Create a new graph from an iterable of node pairs.
+///|
+/// Create a new graph from an iterable of node pairs.
 ///  (N, N) is weighted of node pairs, the same weight are considered the same point!
 ///
 /// Parameters
@@ -552,7 +587,7 @@ pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges(
 /// ```
 pub fn[N : Default + Eq + Hash, E : Default] Graph::from_edges(
   iters : Iter[(N, N)],
-  directed~ : Bool = true
+  directed? : Bool = true,
 ) -> Graph[N, E] {
   let g = Graph::with_capacity(0, 0, directed~)
   g.extend_with_edges(iters)
@@ -561,7 +596,7 @@ pub fn[N : Default + Eq + Hash, E : Default] Graph::from_edges(
 
 ///|
 test "from_edges" {
-  let g: Graph[Int, Unit] = Graph::from_edges([(1, 2), (2, 3)].iter())
+  let g : Graph[Int, Unit] = Graph::from_edges([(1, 2), (2, 3)].iter())
   inspect(g.node_count(), content="3")
   inspect(g.edge_count(), content="2")
   inspect(
@@ -570,7 +605,8 @@ test "from_edges" {
   )
 }
 
-///| Extend the graph by adding edges with weights from an iterable of node triples.
+///|
+/// Extend the graph by adding edges with weights from an iterable of node triples.
 ///  `N` is weighted of node pairs, the same weight are considered the same point!
 ///
 /// Parameters
@@ -588,9 +624,9 @@ test "from_edges" {
 /// ```
 pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges_with_weights(
   self : Graph[N, E],
-  iterable : Iter[(N, N, E)]
+  iterable : Iter[(N, N, E)],
 ) -> Unit {
-  let mp : @hashmap.T[N, NodeIndex] = @hashmap.new()
+  let mp : @hashmap.HashMap[N, NodeIndex] = @hashmap.new()
   for elt in iterable {
     let (a, b, w) = elt
     let a_idx = mp.get_or_init(a, fn() {
@@ -607,7 +643,8 @@ pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges_with_weigh
   }
 }
 
-///| Create a new graph from an iterable of node triples with weights.
+///|
+/// Create a new graph from an iterable of node triples with weights.
 ///  `N` is weighted of node pairs, the same weight are considered the same point!
 ///
 /// Parameters
@@ -625,7 +662,7 @@ pub fn[N : Default + Eq + Hash, E : Default] Graph::extend_with_edges_with_weigh
 /// ```
 pub fn[N : Default + Eq + Hash, E : Default] Graph::from_edges_with_weights(
   iters : Iter[(N, N, E)],
-  directed~ : Bool = true
+  directed? : Bool = true,
 ) -> Graph[N, E] {
   let g = Graph::with_capacity(0, 0, directed~)
   g.extend_with_edges_with_weights(iters)
@@ -645,7 +682,8 @@ test "from_edges_with_weights" {
   inspect(g.edges[1].weight, content="2")
 }
 
-///| Check if the graph contains a cycle.
+///|
+/// Check if the graph contains a cycle.
 ///
 /// Parameters
 ///
@@ -674,7 +712,7 @@ pub fn[N, E] Graph::is_cyclic(self : Graph[N, E]) -> Bool {
 
 ///|
 test "Graph::is_cyclic/directed" {
-  let g: Graph[Int, Unit] = Graph::from_edges([(1, 2), (2, 3)].iter())
+  let g : Graph[Int, Unit] = Graph::from_edges([(1, 2), (2, 3)].iter())
   inspect(g.is_cyclic(), content="false")
   g.add_edge(NodeIndex::new(0), NodeIndex::new(2)) |> ignore
   inspect(g.is_cyclic(), content="false")
@@ -684,7 +722,10 @@ test "Graph::is_cyclic/directed" {
 
 ///|
 test "Graph::is_cyclic/undirected" {
-  let g: Graph[Int, Unit] = Graph::from_edges([(1, 2), (2, 3)].iter(), directed=false)
+  let g : Graph[Int, Unit] = Graph::from_edges(
+    [(1, 2), (2, 3)].iter(),
+    directed=false,
+  )
   inspect(g.is_cyclic(), content="false")
   g.add_edge(NodeIndex::new(0), NodeIndex::new(2)) |> ignore
   inspect(g.is_cyclic(), content="false")
@@ -695,8 +736,8 @@ fn EdgeIndex::index(self : EdgeIndex) -> Int {
   self.ix
 }
 
-///| 
-fn[N, E] directions(self : Graph[N, E]) -> Array[Int] {
+///|
+fn[N, E] Graph::directions(self : Graph[N, E]) -> Array[Int] {
   if self.directed {
     [0]
   } else {
@@ -704,7 +745,8 @@ fn[N, E] directions(self : Graph[N, E]) -> Array[Int] {
   }
 }
 
-///| Adjust the edge links in the graph after an edge is removed or modified.
+///|
+/// Adjust the edge links in the graph after an edge is removed or modified.
 ///
 /// Parameters
 ///
@@ -716,11 +758,11 @@ fn[N, E] directions(self : Graph[N, E]) -> Array[Int] {
 ///
 /// - `Unit` : This function modifies the graph in place.
 ///
-fn[N, E] change_edge_links(
+fn[N, E] Graph::change_edge_links(
   self : Graph[N, E],
   edge_node : (NodeIndex, NodeIndex),
   e : EdgeIndex,
-  edge_next : (EdgeIndex, EdgeIndex)
+  edge_next : (EdgeIndex, EdgeIndex),
 ) -> Unit {
   for d in self.directions() {
     let k = d
@@ -755,7 +797,8 @@ fn[N, E] change_edge_links(
   }
 }
 
-///| Adjust the indices of edges in the graph after removing an edge.
+///|
+/// Adjust the indices of edges in the graph after removing an edge.
 ///
 /// Parameters
 ///
@@ -773,7 +816,10 @@ fn[N, E] change_edge_links(
 /// let edge = graph.add_edge(node_a, node_b, weight=10)
 /// inspect!(graph.remove_edge_adjust_indices(edge), content="Some(10)")
 /// ```
-fn[N, E] remove_edge_adjust_indices(self : Graph[N, E], e : EdgeIndex) -> E? {
+fn[N, E] Graph::remove_edge_adjust_indices(
+  self : Graph[N, E],
+  e : EdgeIndex,
+) -> E? {
   let last_index = self.edges.length() - 1
   if e.index() != last_index {
     self.edges.swap(e.index(), last_index)
@@ -788,7 +834,8 @@ fn[N, E] remove_edge_adjust_indices(self : Graph[N, E], e : EdgeIndex) -> E? {
   Some(edge.weight)
 }
 
-///| Remove an edge from the graph.
+///|
+/// Remove an edge from the graph.
 ///
 /// Parameters
 ///
@@ -806,7 +853,7 @@ fn[N, E] remove_edge_adjust_indices(self : Graph[N, E], e : EdgeIndex) -> E? {
 /// let edge = graph.add_edge(node_a, node_b, weight=10)
 /// inspect!(graph.remove_edge(edge), content="Some(10)")
 /// ```
-pub fn[N, E] remove_edge(self : Graph[N, E], e : EdgeIndex) -> E? {
+pub fn[N, E] Graph::remove_edge(self : Graph[N, E], e : EdgeIndex) -> E? {
   let (edge_node, edge_next) = match self.edges.get(e.index()) {
     None => return None
     Some(x) => (x.node, x.next)
@@ -849,7 +896,8 @@ test "remove_edge/multi" {
   inspect(g.find_edge(node_a, node_c), content="None")
 }
 
-///| Remove a node from the graph.
+///|
+/// Remove a node from the graph.
 ///
 /// Parameters
 ///
@@ -865,7 +913,7 @@ test "remove_edge/multi" {
 /// let node_a = graph.add_node(weight=1)
 /// inspect!(graph.remove_node(node_a), content="Some(1)")
 /// ```
-pub fn[N, E] remove_node(self : Graph[N, E], a : NodeIndex) -> N? {
+pub fn[N, E] Graph::remove_node(self : Graph[N, E], a : NodeIndex) -> N? {
   guard self.nodes.get(a.index()) is Some(_) else { return None }
   fn remove_chain(a : NodeIndex, k : Int) -> Unit {
     let next = self.nodes[a.index()].next(k)

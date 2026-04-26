@@ -1,12 +1,12 @@
 ///|
 test "Graph::new" {
-  struct weight {
+  struct Weight {
     // value : Int
     // unit : String
   } derive(Default)
-  let graph : @network.Graph[weight, Unit] = Graph::new()
-  // graph.add_node(weight=weight::{ value: 1, unit: "kg" }) |> ignore
-  graph.add_node(weight=weight::{  }) |> ignore
+  let graph : @network.Graph[Weight, Unit] = Graph::new()
+  // graph.add_node(weight=Weight::{ value: 1, unit: "kg" }) |> ignore
+  graph.add_node(weight=Weight::{  }) |> ignore
 }
 
 ///|
@@ -34,7 +34,7 @@ test "remove_node" {
 
 ///|
 test "remove_node/empty" {
-  let g: @network.Graph[Int, Unit] = Graph::new()
+  let g : @network.Graph[Int, Unit] = Graph::new()
   let node_a = g.add_node(weight=0)
   inspect(g.node_count(), content="1")
   inspect(g.remove_node(node_a), content="Some(0)")
