@@ -1,0 +1,9 @@
+import {
+  "moonbitlang/core/cmp",
+  "moonbitlang/core/deque",
+  "moonbitlang/core/hashmap",
+  "moonbitlang/core/hashset",
+  "moonbitlang/core/int",
+  "moonbitlang/core/math",
+  "moonbitlang/core/priority_queue",
+}
