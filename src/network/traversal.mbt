@@ -4,7 +4,8 @@ struct Dfs {
   discovered : VisitMap
 }
 
-///| Create a new Depth-First Search (DFS) instance starting from a given node.
+///|
+/// Create a new Depth-First Search (DFS) instance starting from a given node.
 ///
 /// Parameters
 ///
@@ -22,19 +23,20 @@ struct Dfs {
 /// let dfs = Dfs::new(graph, node_a)
 /// ```
 pub fn[N, E] Dfs::new(graph : Graph[N, E], start : NodeIndex) -> Dfs {
-  Dfs::{ stack: [start], discovered: graph.visit_map() }
+  Dfs::{ stack: [start], discovered: Visitable::visit_map(graph), }
 }
 
 ///|
 struct VisitMap {
-  // visit : @hashmap.T[NodeIndex, Bool]
+  // visit : @hashmap.HashMap[NodeIndex, Bool]
   visit : Array[Bool]
 }
 
-///| create a new VisitMap
+///|
+/// create a new VisitMap
 pub fn VisitMap::new() -> VisitMap {
-  // VisitMap::{ visit: @hashmap.new() }
-  VisitMap::{ visit: Array::new() }
+  // VisitMap::{ visit: @hashmap.HashMap([]) }
+  VisitMap::{ visit: Array(), }
 }
 
 // ///|
@@ -52,20 +54,20 @@ pub fn VisitMap::new() -> VisitMap {
 // }
 
 ///|
-fn VisitMap::contain(self : VisitMap, nx : Int) -> Bool {
+fn VisitMap::contain(self : VisitMap, nx : Int32) -> Bool {
   self.visit[nx]
 }
 
 ///|
-impl VM for VisitMap with visit(self, node : NodeIndex) -> Bool {
+impl VM for VisitMap with fn visit(self, node : NodeIndex) -> Bool {
   let nx = node.ix
   let res = self.contain(nx)
   self.visit[nx] = true
-  not(res)
+  !res
 }
 
 ///|
-impl VM for VisitMap with is_visited(self, node : NodeIndex) -> Bool {
+impl VM for VisitMap with fn is_visited(self, node : NodeIndex) -> Bool {
   // self.visit.contains(node)
   self.contain(node.ix)
 }
@@ -82,20 +84,20 @@ impl VM for VisitMap with is_visited(self, node : NodeIndex) -> Bool {
 
 ///|
 priv trait VM {
-  visit(Self, NodeIndex) -> Bool
-  is_visited(Self, NodeIndex) -> Bool
+  fn visit(Self, NodeIndex) -> Bool
+  fn is_visited(Self, NodeIndex) -> Bool
   // unvisit(Self, NodeIndex) -> Bool
 }
 
 ///|
 priv trait Visitable {
-  visit_map(Self) -> VisitMap
+  fn visit_map(Self) -> VisitMap
   // reset_map(Self, VisitMap) -> Unit
 }
 
 ///|
-impl[N, E] Visitable for Graph[N, E] with visit_map(self) -> VisitMap {
-  VisitMap::{ visit: Array::make(self.node_count(), false) }
+impl[N, E] Visitable for Graph[N, E] with fn visit_map(self) -> VisitMap {
+  VisitMap::{ visit: Array::make(self.node_count(), false), }
 }
 
 ///|
@@ -116,15 +118,16 @@ fn VisitMap::clear(self : VisitMap) -> Unit {
 
 // ///| create an empty Dfs
 // pub fn Dfs::empty[N, E](graph : Graph[N, E]) -> Dfs {
-//   Dfs::{ stack: [], discovered: graph.visit_map() }
+//   Dfs::{ stack: [], discovered: Visitable::visit_map(graph) }
 // }
 
 ///|
-impl Default for Dfs with default() -> Dfs {
-  Dfs::{ stack: [], discovered: VisitMap::default() }
+impl Default for Dfs with fn default() -> Dfs {
+  Dfs::{ stack: [], discovered: Default::default(), }
 }
 
-///| Create a new Depth-First Search (DFS) instance from given parts.
+///|
+/// Create a new Depth-First Search (DFS) instance from given parts.
 ///
 /// Parameters
 ///
@@ -140,23 +143,26 @@ impl Default for Dfs with default() -> Dfs {
 /// let dfs = Dfs::from_parts(stack, discovered)
 /// ```
 pub fn Dfs::from_parts(stack : Array[NodeIndex], discovered : VisitMap) -> Dfs {
-  Dfs::{ stack, discovered }
+  Dfs::{ stack, discovered, }
 }
 
-///| reset the dfs
+///|
+/// reset the dfs
 pub fn Dfs::reset(self : Dfs) -> Unit {
   self.stack.clear()
   self.discovered.visit.clear()
 }
 
-///| Keep the discovered map, but clear the visit stack and
+///|
+/// Keep the discovered map, but clear the visit stack and
 /// restart the dfs from a particular node.
 pub fn Dfs::move_to(self : Dfs, node : NodeIndex) -> Unit {
   self.stack.clear()
   self.stack.push(node)
 }
 
-///| Perform the next step in the Depth-First Search (DFS) traversal.
+///|
+/// Perform the next step in the Depth-First Search (DFS) traversal.
 ///
 /// Parameters
 ///
@@ -185,7 +191,7 @@ pub fn[N, E] Dfs::next(self : Dfs, graph : Graph[N, E]) -> NodeIndex? {
   while self.stack.pop() is Some(node) {
     if self.discovered.visit(node) {
       for succ in graph.neighbors(node) {
-        if not(self.discovered.is_visited(succ)) {
+        if !VM::is_visited(self.discovered, succ) {
           self.stack.push(succ)
         }
       }
@@ -197,7 +203,7 @@ pub fn[N, E] Dfs::next(self : Dfs, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Dfs::next" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -223,20 +229,21 @@ struct DfsPostOrder {
 }
 
 ///|
-impl Default for VisitMap with default() -> VisitMap {
-  VisitMap::{ visit: Array::new() }
+impl Default for VisitMap with fn default() -> VisitMap {
+  VisitMap::{ visit: Array(), }
 }
 
 ///|
-impl Default for DfsPostOrder with default() -> DfsPostOrder {
+impl Default for DfsPostOrder with fn default() -> DfsPostOrder {
   DfsPostOrder::{
     stack: [],
-    discovered: VisitMap::default(),
-    finished: VisitMap::default(),
+    discovered: Default::default(),
+    finished: Default::default(),
   }
 }
 
-///| Create a new Depth-First Search (DFS) Post-Order instance starting from a given node.
+///|
+/// Create a new Depth-First Search (DFS) Post-Order instance starting from a given node.
 ///
 /// Parameters
 ///
@@ -253,30 +260,33 @@ impl Default for DfsPostOrder with default() -> DfsPostOrder {
 /// ```
 pub fn[N, E] DfsPostOrder::new(
   graph : Graph[N, E],
-  start : NodeIndex
+  start : NodeIndex,
 ) -> DfsPostOrder {
   DfsPostOrder::{
     stack: [start],
-    discovered: graph.visit_map(),
-    finished: graph.visit_map(),
+    discovered: Visitable::visit_map(graph),
+    finished: Visitable::visit_map(graph),
   }
 }
 
-///| reset the DfsPostOrder
+///|
+/// reset the DfsPostOrder
 pub fn DfsPostOrder::reset(self : DfsPostOrder) -> Unit {
   self.stack.clear()
   self.discovered.visit.clear()
   self.finished.visit.clear()
 }
 
-///| Keep the discovered map, but clear the visit stack and
+///|
+/// Keep the discovered map, but clear the visit stack and
 /// restart the dfs from a particular node.
 pub fn DfsPostOrder::move_to(self : DfsPostOrder, node : NodeIndex) -> Unit {
   self.stack.clear()
   self.stack.push(node)
 }
 
-///| Perform the next step in the Depth-First Search (DFS) Post-Order traversal.
+///|
+/// Perform the next step in the Depth-First Search (DFS) Post-Order traversal.
 ///
 /// Parameters
 ///
@@ -302,12 +312,12 @@ pub fn DfsPostOrder::move_to(self : DfsPostOrder, node : NodeIndex) -> Unit {
 /// ```
 pub fn[N, E] DfsPostOrder::next(
   self : DfsPostOrder,
-  graph : Graph[N, E]
+  graph : Graph[N, E],
 ) -> NodeIndex? {
   while self.stack.last() is Some(node) {
     if self.discovered.visit(node) {
       for succ in graph.neighbors(node) {
-        if not(self.discovered.is_visited(succ)) {
+        if !VM::is_visited(self.discovered, succ) {
           self.stack.push(succ)
         }
       }
@@ -343,16 +353,17 @@ test "DfsPostOrder::next" {
 
 ///|
 struct Bfs {
-  stack : @deque.T[NodeIndex]
+  stack : @deque.Deque[NodeIndex]
   discovered : VisitMap
 }
 
 ///|
-impl Default for Bfs with default() -> Bfs {
-  Bfs::{ stack: @deque.new(), discovered: VisitMap::default() }
+impl Default for Bfs with fn default() -> Bfs {
+  Bfs::{ stack: @deque.Deque([]), discovered: Default::default(), }
 }
 
-///| Create a new Breadth-First Search (BFS) instance starting from a given node.
+///|
+/// Create a new Breadth-First Search (BFS) instance starting from a given node.
 ///
 /// Parameters
 ///
@@ -368,14 +379,15 @@ impl Default for Bfs with default() -> Bfs {
 /// let bfs = Bfs::new(graph, start_node)
 /// ```
 pub fn[N, E] Bfs::new(graph : Graph[N, E], start : NodeIndex) -> Bfs {
-  let stack = @deque.new()
+  let stack = @deque.Deque([])
   stack.push_front(start)
-  let discovered = graph.visit_map()
+  let discovered = Visitable::visit_map(graph)
   discovered.visit(start) |> ignore
-  Bfs::{ stack, discovered }
+  Bfs::{ stack, discovered, }
 }
 
-///| Perform the next step in the Breadth-First Search (BFS) traversal.
+///|
+/// Perform the next step in the Breadth-First Search (BFS) traversal.
 ///
 /// Parameters
 ///
@@ -416,7 +428,7 @@ pub fn[N, E] Bfs::next(self : Bfs, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Bfs::next" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -434,7 +446,7 @@ test "Bfs::next" {
 
 ///|
 test "Bfs::next/multi" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -454,19 +466,16 @@ test "Bfs::next/multi" {
 struct Topo {
   tovisit : Array[NodeIndex]
   ordered : VisitMap
-  degrees : Array[Int]
+  degrees : Array[Int32]
 }
 
 ///|
-impl Default for Topo with default() -> Topo {
-  Topo::{
-    tovisit: Array::new(),
-    ordered: VisitMap::default(),
-    degrees: Array::new(),
-  }
+impl Default for Topo with fn default() -> Topo {
+  Topo::{ tovisit: Array(), ordered: Default::default(), degrees: Array(), }
 }
 
-///| Create a new Topological Sort (Topo) instance for a given graph.
+///|
+/// Create a new Topological Sort (Topo) instance for a given graph.
 ///
 /// Parameters
 ///
@@ -482,26 +491,28 @@ impl Default for Topo with default() -> Topo {
 /// ```
 pub fn[N, E] Topo::new(graph : Graph[N, E]) -> Topo {
   let degrees = graph.get_indegree()
-  let ordered = graph.visit_map()
-  let tovisit = Array::new()
+  let ordered = Visitable::visit_map(graph)
+  let tovisit = Array()
   for i in 0..<graph.node_count() {
     if degrees[i] == 0 {
       tovisit.push(NodeIndex::new(i))
     }
   }
-  Topo::{ tovisit, ordered, degrees }
+  Topo::{ tovisit, ordered, degrees, }
 }
 
-///| Create an empty Topo instance.
+///|
+/// Create an empty Topo instance.
 pub fn[N, E] Topo::empty(graph : Graph[N, E]) -> Topo {
   Topo::{
-    tovisit: Array::new(),
-    ordered: graph.visit_map(),
-    degrees: Array::new(),
+    tovisit: Array(),
+    ordered: Visitable::visit_map(graph),
+    degrees: Array(),
   }
 }
 
-///| Perform the next step in the Topological Sort (Topo) traversal.
+///|
+/// Perform the next step in the Topological Sort (Topo) traversal.
 ///
 /// Parameters
 ///
@@ -549,7 +560,7 @@ pub fn[N, E] Topo::next(self : Topo, graph : Graph[N, E]) -> NodeIndex? {
 
 ///|
 test "Topo::next" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -567,7 +578,7 @@ test "Topo::next" {
 
 ///|
 test "Topo::next/multi" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -586,7 +597,7 @@ test "Topo::next/multi" {
 }
 
 ///|
-fn[N, E] get_indegree(self : Graph[N, E]) -> Array[Int] {
+fn[N, E] Graph::get_indegree(self : Graph[N, E]) -> Array[Int32] {
   let deg = Array::make(self.node_count(), 0)
   for i in 0..<self.node_count() {
     let mut edix = self.nodes[i].next.0
@@ -600,7 +611,7 @@ fn[N, E] get_indegree(self : Graph[N, E]) -> Array[Int] {
 
 ///|
 test "get_indegree" {
-  let graph: Graph[Unit, Unit] = Graph::new()
+  let graph : Graph[Unit, Unit] = Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()

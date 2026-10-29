@@ -1,0 +1,15 @@
+name = "smallbearrr/NetworkX"
+
+version = "0.1.4"
+
+readme = "README.md"
+
+repository = "https://github.com/moonbit-community/NetworkX"
+
+license = "Apache-2.0"
+
+keywords = [ "graph", "data-structure" ]
+
+description = ""
+
+source = "src"

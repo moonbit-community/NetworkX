@@ -1,18 +1,19 @@
 ///|
 struct Lca[N, E] {
   graph : Graph[N, E]
-  deep : Array[Int]
-  father : Array[Array[Int]]
+  deep : Array[Int32]
+  father : Array[Array[Int32]]
   mut root : NodeIndex
 }
 
-///| dfs0
+///|
+/// dfs0
 fn[N, E] Lca::update_lca_info_pre(
   self : Lca[N, E],
   graph : Graph[N, E],
   u : NodeIndex,
   f : NodeIndex,
-  d : Int
+  d : Int32,
 ) -> Unit {
   self.deep[u.ix] = d
   for v in graph.neighbors(u) {
@@ -29,19 +30,20 @@ fn[N, E] Lca::update_lca_info(
   graph : Graph[N, E],
   u : NodeIndex,
   f : NodeIndex,
-  d : Int
+  d : Int32,
 ) -> Unit {
   let n = self.graph.node_count()
   let top = @math.log2((n + 1).to_double()).to_int()
   self.update_lca_info_pre(graph, u, f, d)
-  for j in 1..=top {
-    for i in 1..=n {
+  for j in 1..<=top {
+    for i in 1..<=n {
       self.father[i][j] = self.father[self.father[i][j - 1]][j - 1]
     }
   }
 }
 
-///| Create a new Lowest Common Ancestor (LCA) instance
+///|
+/// Create a new Lowest Common Ancestor (LCA) instance
 ///
 /// Parameters
 ///
@@ -62,7 +64,7 @@ fn[N, E] Lca::update_lca_info(
 /// ```
 pub fn[N, E] Lca::new(
   graph : Graph[N, E],
-  root : NodeIndex
+  root : NodeIndex,
 ) -> Lca[N, E] raise CycleDetected {
   guard graph.is_cyclic() == false else {
     raise CycleDetected("There is a cycle in the graph")
@@ -71,12 +73,13 @@ pub fn[N, E] Lca::new(
   let deep = Array::make(n + 1, 0)
   let top = @math.log2((n + 1).to_double()).to_int()
   let father = Array::makei(n + 1, fn(_) { Array::make(top + 1, 0) })
-  let lca = Lca::{ graph, deep, father, root }
+  let lca = Lca::{ graph, deep, father, root, }
   lca.update_lca_info(lca.graph, lca.root, NodeIndex::new(-1), 1)
   lca
 }
 
-///| Query the Lowest Common Ancestor (LCA) of two nodes in the graph
+///|
+/// Query the Lowest Common Ancestor (LCA) of two nodes in the graph
 ///
 /// Parameters
 ///
@@ -94,7 +97,7 @@ pub fn[N, E] Lca::new(
 pub fn[N, E] Lca::query(
   self : Lca[N, E],
   u : NodeIndex,
-  v : NodeIndex
+  v : NodeIndex,
 ) -> NodeIndex {
   let mut u = u.ix
   let mut v = v.ix
@@ -122,7 +125,8 @@ pub fn[N, E] Lca::query(
   NodeIndex::new(self.father[u][0])
 }
 
-///| Reset the Lowest Common Ancestor (LCA) instance
+///|
+/// Reset the Lowest Common Ancestor (LCA) instance
 ///
 /// Parameters
 ///
@@ -146,7 +150,7 @@ pub fn[N, E] Lca::reset(self : Lca[N, E], root? : NodeIndex) -> Unit {
 
 ///|
 test "Lca::query/undir1" {
-  let graph: Graph[Unit, Unit] = Graph::new(directed=false)
+  let graph : Graph[Unit, Unit] = Graph::new(directed=false)
   let a = graph.add_node()
   let b = graph.add_node()
   graph.add_edge(a, b) |> ignore
@@ -159,7 +163,7 @@ test "Lca::query/undir1" {
 
 ///|
 test "Lca::query/undir2" {
-  let graph: Graph[Unit, Unit] = Graph::new(directed=false)
+  let graph : Graph[Unit, Unit] = Graph::new(directed=false)
   let a = graph.add_node()
   let b = graph.add_node()
   let c = graph.add_node()
@@ -176,7 +180,7 @@ test "Lca::query/undir2" {
 
 ///|
 test "Lca::query/undir3" {
-  let graph: Graph[Unit, Unit] = Graph::new(directed=false)
+  let graph : Graph[Unit, Unit] = Graph::new(directed=false)
   let a = graph.add_node()
   let b = graph.add_node()
   let c = graph.add_node()
@@ -197,7 +201,7 @@ test "Lca::query/undir3" {
 
 ///|
 test "Lca::query/dir" {
-  let graph: Graph[Unit, Unit] = Graph::new(directed=true)
+  let graph : Graph[Unit, Unit] = Graph::new(directed=true)
   let a = graph.add_node()
   let b = graph.add_node()
   let c = graph.add_node()

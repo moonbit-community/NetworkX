@@ -1,4 +1,5 @@
-///| Compute the shortest paths from a starting node to all other nodes using Dijkstra's algorithm.
+///|
+/// Compute the shortest paths from a starting node to all other nodes using Dijkstra's algorithm.
 ///
 /// Parameters
 ///
@@ -6,7 +7,7 @@
 ///
 /// Returns
 ///
-/// - `@hashmap.T[NodeIndex, E]!` : A hashmap containing the shortest distances from the starting node to all reachable nodes.
+/// - `@hashmap.HashMap[NodeIndex, E]!` : A hashmap containing the shortest distances from the starting node to all reachable nodes.
 ///
 /// Example
 /// ```
@@ -14,17 +15,18 @@
 /// ```
 pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   self : Graph[N, E],
-  a : NodeIndex
-) -> @hashmap.T[NodeIndex, E] raise {
+  a : NodeIndex,
+) -> @hashmap.HashMap[NodeIndex, E] raise {
   guard self.nodes.get(a.index()) is Some(_) else {
     raise NodeNotFound("Node not found")
   }
   let nodes_count = self.node_count()
   let vis = Array::make(nodes_count, false)
-  let dist = @hashmap.new()
-  let q : @priority_queue.T[(E, NodeIndex)] = @priority_queue.new()
-  q.push((E::default(), a))
-  while not(q.is_empty()) {
+  let dist = @hashmap.HashMap([])
+  let q : @priority_queue.PriorityQueue[(E, NodeIndex)] = @priority_queue.PriorityQueue([],
+  )
+  q.push((Default::default(), a))
+  while !q.is_empty() {
     let (d, u) = q.pop().unwrap()
     if vis[u.index()] {
       continue
@@ -47,7 +49,3 @@ pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   }
   dist
 }
-
-
-
-
