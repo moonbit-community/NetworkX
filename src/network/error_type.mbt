@@ -1,19 +1,51 @@
 ///|
 priv suberror NodeIxLimit {
   NodeIxLimit(String)
-} derive(Show)
+}
 
 ///|
 priv suberror NodeOutBounds {
   NodeOutBounds(String)
-} derive(Show)
+}
 
 ///|
 priv suberror NodeNotFound {
   NodeNotFound(String)
-} derive(Show)
+}
 
 ///|
 suberror CycleDetected {
   CycleDetected(String)
-} derive(Show)
+}
+
+///|
+impl Show for NodeIxLimit with fn output(self, logger) {
+  let NodeIxLimit(message) = self
+  logger.write_string("NodeIxLimit(")
+  Show::output(message, logger)
+  logger.write_string(")")
+}
+
+///|
+impl Show for NodeOutBounds with fn output(self, logger) {
+  let NodeOutBounds(message) = self
+  logger.write_string("NodeOutBounds(")
+  Show::output(message, logger)
+  logger.write_string(")")
+}
+
+///|
+impl Show for NodeNotFound with fn output(self, logger) {
+  let NodeNotFound(message) = self
+  logger.write_string("NodeNotFound(")
+  Show::output(message, logger)
+  logger.write_string(")")
+}
+
+///|
+pub impl Show for CycleDetected with fn output(self, logger) {
+  let CycleDetected(message) = self
+  logger.write_string("CycleDetected(")
+  Show::output(message, logger)
+  logger.write_string(")")
+}

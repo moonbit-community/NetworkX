@@ -8,9 +8,10 @@ import {
 // Values
 
 // Errors
-type CycleDetected derive(Show)
+type CycleDetected
 pub fn CycleDetected::output(Self, &Logger) -> Unit
 pub fn CycleDetected::to_string(Self) -> String
+pub impl Show for CycleDetected
 
 // Types and methods
 type Bfs
@@ -30,23 +31,25 @@ pub fn[N, E] DfsPostOrder::new(Graph[N, E], NodeIndex) -> Self
 pub fn[N, E] DfsPostOrder::next(Self, Graph[N, E]) -> NodeIndex?
 pub fn DfsPostOrder::reset(Self) -> Unit
 
-type Edge[E] derive(Eq, Hash, Show)
+type Edge[E] derive(Eq, Hash)
 pub fn[E : Eq] Edge::equal(Self[E], Self[E]) -> Bool
 pub fn[E : Hash] Edge::hash(Self[E]) -> Int32
 pub fn[E : Hash] Edge::hash_combine(Self[E], Hasher) -> Unit
 pub fn[E : Eq] Edge::not_equal(Self[E], Self[E]) -> Bool
 pub fn[E : Show] Edge::output(Self[E], &Logger) -> Unit
 pub fn[E : Show] Edge::to_string(Self[E]) -> String
+pub impl[E : Show] Show for Edge[E]
 
-type EdgeIndex derive(Eq, Hash, Show)
+type EdgeIndex derive(Eq, Hash)
 pub fn EdgeIndex::equal(Self, Self) -> Bool
 pub fn EdgeIndex::hash(Self) -> Int32
 pub fn EdgeIndex::hash_combine(Self, Hasher) -> Unit
 pub fn EdgeIndex::not_equal(Self, Self) -> Bool
 pub fn EdgeIndex::output(Self, &Logger) -> Unit
 pub fn EdgeIndex::to_string(Self) -> String
+pub impl Show for EdgeIndex
 
-type Graph[N, E] derive(Show)
+type Graph[N, E]
 pub fn[N, E : Default] Graph::add_edge(Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex
 pub fn[N : Default, E] Graph::add_node(Self[N, E], weight? : N) -> NodeIndex
 pub fn[N, E] Graph::capacity(Self[N, E]) -> (Int32, Int32)
@@ -71,13 +74,14 @@ pub fn[N : Show, E : Show] Graph::to_string(Self[N, E]) -> String
 pub fn[N, E : Default] Graph::try_add_edge(Self[N, E], NodeIndex, NodeIndex, weight? : E) -> EdgeIndex raise
 pub fn[N : Default, E] Graph::try_add_node(Self[N, E], weight? : N) -> NodeIndex raise
 pub fn[N, E] Graph::with_capacity(Int32, Int32, directed? : Bool) -> Self[N, E]
+pub impl[N : Show, E : Show] Show for Graph[N, E]
 
 type Lca[N, E]
 pub fn[N, E] Lca::new(Graph[N, E], NodeIndex) -> Self[N, E] raise CycleDetected
 pub fn[N, E] Lca::query(Self[N, E], NodeIndex, NodeIndex) -> NodeIndex
 pub fn[N, E] Lca::reset(Self[N, E], root? : NodeIndex) -> Unit
 
-type NodeIndex derive(Compare, Eq, Hash, Show)
+type NodeIndex derive(Compare, Eq, Hash)
 pub fn NodeIndex::compare(Self, Self) -> Int32
 pub fn NodeIndex::equal(Self, Self) -> Bool
 pub fn NodeIndex::hash(Self) -> Int32
@@ -90,6 +94,7 @@ pub fn NodeIndex::op_le(Self, Self) -> Bool
 pub fn NodeIndex::op_lt(Self, Self) -> Bool
 pub fn NodeIndex::output(Self, &Logger) -> Unit
 pub fn NodeIndex::to_string(Self) -> String
+pub impl Show for NodeIndex
 
 type Topo
 pub fn[N, E] Topo::empty(Graph[N, E]) -> Self
