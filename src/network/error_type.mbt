@@ -1,19 +1,19 @@
 ///|
 priv suberror NodeIxLimit {
   NodeIxLimit(String)
-} derive(Debug)
+} derive(Show)
 
 ///|
 priv suberror NodeOutBounds {
   NodeOutBounds(String)
-} derive(Debug)
+} derive(Show)
 
 ///|
 priv suberror NodeNotFound {
   NodeNotFound(String)
-} derive(Debug)
+} derive(Show)
 
 ///|
 suberror CycleDetected {
   CycleDetected(String)
-} derive(Debug)
+} derive(Show)

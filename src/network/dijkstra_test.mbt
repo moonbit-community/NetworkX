@@ -1,6 +1,6 @@
 ///|
 test "dijkstra/Float" {
-  let graph : @network.Graph[Unit, Float] = Graph::new()
+  let graph : @network.Graph[Unit, Float] = @network.Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()
@@ -14,7 +14,7 @@ test "dijkstra/Float" {
 
 ///|
 test "dijkstra/Int" {
-  let graph : @network.Graph[Unit, Int] = Graph::new()
+  let graph : @network.Graph[Unit, Int32] = @network.Graph::new()
   let node_a = graph.add_node()
   let node_b = graph.add_node()
   let node_c = graph.add_node()

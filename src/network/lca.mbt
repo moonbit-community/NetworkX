@@ -1,8 +1,8 @@
 ///|
 struct Lca[N, E] {
   graph : Graph[N, E]
-  deep : Array[Int]
-  father : Array[Array[Int]]
+  deep : Array[Int32]
+  father : Array[Array[Int32]]
   mut root : NodeIndex
 }
 
@@ -13,7 +13,7 @@ fn[N, E] Lca::update_lca_info_pre(
   graph : Graph[N, E],
   u : NodeIndex,
   f : NodeIndex,
-  d : Int,
+  d : Int32,
 ) -> Unit {
   self.deep[u.ix] = d
   for v in graph.neighbors(u) {
@@ -30,7 +30,7 @@ fn[N, E] Lca::update_lca_info(
   graph : Graph[N, E],
   u : NodeIndex,
   f : NodeIndex,
-  d : Int,
+  d : Int32,
 ) -> Unit {
   let n = self.graph.node_count()
   let top = @math.log2((n + 1).to_double()).to_int()
@@ -73,7 +73,7 @@ pub fn[N, E] Lca::new(
   let deep = Array::make(n + 1, 0)
   let top = @math.log2((n + 1).to_double()).to_int()
   let father = Array::makei(n + 1, fn(_) { Array::make(top + 1, 0) })
-  let lca = Lca::{ graph, deep, father, root }
+  let lca = Lca::{ graph, deep, father, root, }
   lca.update_lca_info(lca.graph, lca.root, NodeIndex::new(-1), 1)
   lca
 }

@@ -1,6 +1,7 @@
 target/
 .mooncakes/
-_build/
 
 test.mbt
 todo_list.md
+
+_build/

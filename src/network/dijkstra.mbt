@@ -22,9 +22,10 @@ pub fn[N, E : Compare + Add + Default] Graph::dijkstra(
   }
   let nodes_count = self.node_count()
   let vis = Array::make(nodes_count, false)
-  let dist = @hashmap.new()
-  let q : @priority_queue.PriorityQueue[(E, NodeIndex)] = @priority_queue.new()
-  q.push((E::default(), a))
+  let dist = @hashmap.HashMap([])
+  let q : @priority_queue.PriorityQueue[(E, NodeIndex)] = @priority_queue.PriorityQueue([],
+  )
+  q.push((Default::default(), a))
   while !q.is_empty() {
     let (d, u) = q.pop().unwrap()
     if vis[u.index()] {

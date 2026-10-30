@@ -1,17 +1,16 @@
 ///|
+priv struct TestWeight {} derive(Default)
+
+///|
 test "Graph::new" {
-  struct Weight {
-    // value : Int
-    // unit : String
-  } derive(Default)
-  let graph : @network.Graph[Weight, Unit] = Graph::new()
-  // graph.add_node(weight=Weight::{ value: 1, unit: "kg" }) |> ignore
-  graph.add_node(weight=Weight::{  }) |> ignore
+  let graph : @network.Graph[TestWeight, Unit] = @network.Graph::new()
+  graph.add_node(weight=TestWeight::{ }) |> ignore
+  assert_eq(graph.node_count(), 1)
 }
 
 ///|
 test "Graph::add_node" {
-  let graph : @network.Graph[Int, Unit] = Graph::new()
+  let graph : @network.Graph[Int32, Unit] = @network.Graph::new()
   let node = graph.add_node(weight=1)
   inspect(node.index(), content="0")
   inspect(graph.node_count(), content="1")
@@ -19,7 +18,7 @@ test "Graph::add_node" {
 
 ///|
 test "remove_node" {
-  let g = Graph::new()
+  let g = @network.Graph::new()
   let node_a = g.add_node()
   let node_b = g.add_node(weight=1)
   let node_c = g.add_node(weight=2)
@@ -34,7 +33,7 @@ test "remove_node" {
 
 ///|
 test "remove_node/empty" {
-  let g : @network.Graph[Int, Unit] = Graph::new()
+  let g : @network.Graph[Int32, Unit] = @network.Graph::new()
   let node_a = g.add_node(weight=0)
   inspect(g.node_count(), content="1")
   inspect(g.remove_node(node_a), content="Some(0)")
