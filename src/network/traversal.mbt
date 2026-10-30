@@ -106,11 +106,6 @@ impl[N, E] Visitable for Graph[N, E] with fn visit_map(self) -> VisitMap {
 //   map.grow(self.node_count())
 // }
 
-///|
-fn VisitMap::clear(self : VisitMap) -> Unit {
-  self.clear()
-}
-
 // ///|
 // fn VisitMap::grow(self : VisitMap, n : Int) -> Unit {
 //   self.visit.resize(n, false)
@@ -120,11 +115,6 @@ fn VisitMap::clear(self : VisitMap) -> Unit {
 // pub fn Dfs::empty[N, E](graph : Graph[N, E]) -> Dfs {
 //   Dfs::{ stack: [], discovered: Visitable::visit_map(graph) }
 // }
-
-///|
-impl Default for Dfs with fn default() -> Dfs {
-  Dfs::{ stack: [], discovered: Default::default(), }
-}
 
 ///|
 /// Create a new Depth-First Search (DFS) instance from given parts.
@@ -212,13 +202,13 @@ test "Dfs::next" {
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let dfs = Dfs::new(graph, node_a)
-  inspect(dfs.next(graph), content=Some(node_a).to_string())
-  inspect(dfs.next(graph), content=Some(node_b).to_string())
-  inspect(dfs.next(graph), content=Some(node_c).to_string())
-  inspect(dfs.next(graph), content=Some(node_d).to_string())
-  inspect(dfs.next(graph), content="None")
+  assert_true(dfs.next(graph) == Some(node_a))
+  assert_true(dfs.next(graph) == Some(node_b))
+  assert_true(dfs.next(graph) == Some(node_c))
+  assert_true(dfs.next(graph) == Some(node_d))
+  inspect(display_option(dfs.next(graph)), content="None")
   // empty the stack
-  inspect(dfs.next(graph), content="None")
+  inspect(display_option(dfs.next(graph)), content="None")
 }
 
 ///|
@@ -226,20 +216,6 @@ struct DfsPostOrder {
   stack : Array[NodeIndex]
   discovered : VisitMap
   finished : VisitMap
-}
-
-///|
-impl Default for VisitMap with fn default() -> VisitMap {
-  VisitMap::{ visit: Array(), }
-}
-
-///|
-impl Default for DfsPostOrder with fn default() -> DfsPostOrder {
-  DfsPostOrder::{
-    stack: [],
-    discovered: Default::default(),
-    finished: Default::default(),
-  }
 }
 
 ///|
@@ -342,24 +318,19 @@ test "DfsPostOrder::next" {
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let dfs = DfsPostOrder::new(graph, node_a)
-  inspect(dfs.next(graph), content=Some(node_d).to_string())
-  inspect(dfs.next(graph), content=Some(node_c).to_string())
-  inspect(dfs.next(graph), content=Some(node_b).to_string())
-  inspect(dfs.next(graph), content=Some(node_a).to_string())
-  inspect(dfs.next(graph), content="None")
+  assert_true(dfs.next(graph) == Some(node_d))
+  assert_true(dfs.next(graph) == Some(node_c))
+  assert_true(dfs.next(graph) == Some(node_b))
+  assert_true(dfs.next(graph) == Some(node_a))
+  inspect(display_option(dfs.next(graph)), content="None")
   // empty the stack
-  inspect(dfs.next(graph), content="None")
+  inspect(display_option(dfs.next(graph)), content="None")
 }
 
 ///|
 struct Bfs {
   stack : @deque.Deque[NodeIndex]
   discovered : VisitMap
-}
-
-///|
-impl Default for Bfs with fn default() -> Bfs {
-  Bfs::{ stack: @deque.Deque([]), discovered: Default::default(), }
 }
 
 ///|
@@ -437,11 +408,11 @@ test "Bfs::next" {
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let bfs = Bfs::new(graph, node_a)
-  inspect(bfs.next(graph), content=Some(node_a).to_string())
-  inspect(bfs.next(graph), content=Some(node_b).to_string())
-  inspect(bfs.next(graph), content=Some(node_c).to_string())
-  inspect(bfs.next(graph), content=Some(node_d).to_string())
-  inspect(bfs.next(graph), content="None")
+  assert_true(bfs.next(graph) == Some(node_a))
+  assert_true(bfs.next(graph) == Some(node_b))
+  assert_true(bfs.next(graph) == Some(node_c))
+  assert_true(bfs.next(graph) == Some(node_d))
+  inspect(display_option(bfs.next(graph)), content="None")
 }
 
 ///|
@@ -455,11 +426,11 @@ test "Bfs::next/multi" {
   graph.add_edge(node_a, node_b) |> ignore
   graph.add_edge(node_b, node_c) |> ignore
   let bfs = Bfs::new(graph, node_a)
-  inspect(bfs.next(graph), content=Some(node_a).to_string())
-  inspect(bfs.next(graph), content=Some(node_b).to_string())
-  inspect(bfs.next(graph), content=Some(node_d).to_string())
-  inspect(bfs.next(graph), content=Some(node_c).to_string())
-  inspect(bfs.next(graph), content="None")
+  assert_true(bfs.next(graph) == Some(node_a))
+  assert_true(bfs.next(graph) == Some(node_b))
+  assert_true(bfs.next(graph) == Some(node_d))
+  assert_true(bfs.next(graph) == Some(node_c))
+  inspect(display_option(bfs.next(graph)), content="None")
 }
 
 ///|
@@ -467,11 +438,6 @@ struct Topo {
   tovisit : Array[NodeIndex]
   ordered : VisitMap
   degrees : Array[Int32]
-}
-
-///|
-impl Default for Topo with fn default() -> Topo {
-  Topo::{ tovisit: Array(), ordered: Default::default(), degrees: Array(), }
 }
 
 ///|
@@ -569,11 +535,11 @@ test "Topo::next" {
   graph.add_edge(node_b, node_c) |> ignore
   graph.add_edge(node_c, node_d) |> ignore
   let topo = Topo::new(graph)
-  inspect(topo.next(graph), content=Some(node_a).to_string())
-  inspect(topo.next(graph), content=Some(node_b).to_string())
-  inspect(topo.next(graph), content=Some(node_c).to_string())
-  inspect(topo.next(graph), content=Some(node_d).to_string())
-  inspect(topo.next(graph), content="None")
+  assert_true(topo.next(graph) == Some(node_a))
+  assert_true(topo.next(graph) == Some(node_b))
+  assert_true(topo.next(graph) == Some(node_c))
+  assert_true(topo.next(graph) == Some(node_d))
+  inspect(display_option(topo.next(graph)), content="None")
 }
 
 ///|
@@ -589,11 +555,11 @@ test "Topo::next/multi" {
   graph.add_edge(node_c, node_a) |> ignore
   graph.add_edge(node_a, node_b) |> ignore
   let topo = Topo::new(graph)
-  inspect(topo.next(graph), content=Some(node_c).to_string())
-  inspect(topo.next(graph), content=Some(node_a).to_string())
-  inspect(topo.next(graph), content=Some(node_b).to_string())
-  inspect(topo.next(graph), content=Some(node_d).to_string())
-  inspect(topo.next(graph), content="None")
+  assert_true(topo.next(graph) == Some(node_c))
+  assert_true(topo.next(graph) == Some(node_a))
+  assert_true(topo.next(graph) == Some(node_b))
+  assert_true(topo.next(graph) == Some(node_d))
+  inspect(display_option(topo.next(graph)), content="None")
 }
 
 ///|
@@ -625,3 +591,6 @@ test "get_indegree" {
   inspect(indeg[node_c.ix], content="1")
   inspect(indeg[node_d.ix], content="1")
 }
+
+///|
+extend VisitMap with VM::{visit, is_visited}

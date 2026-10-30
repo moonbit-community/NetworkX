@@ -1,21 +1,21 @@
 ///|
 struct NodeIndex {
   ix : Int32
-} derive(Eq, Compare, Show, Hash)
+} derive(Eq, Compare, Hash)
 
 ///|
 struct EdgeIndex {
   ix : Int32
   from : NodeIndex
   successor_index : Int32
-} derive(Show, Eq, Hash)
+} derive(Eq, Hash)
 
 ///|
 priv struct Node[N] {
   ix : NodeIndex
   weight : N
   mut next : (EdgeIndex, EdgeIndex)
-} derive(Show)
+}
 
 ///|
 struct Edge[E] {
@@ -23,14 +23,14 @@ struct Edge[E] {
   weight : E
   mut next : (EdgeIndex, EdgeIndex)
   mut node : (NodeIndex, NodeIndex)
-} derive(Show, Eq, Hash)
+} derive(Eq, Hash)
 
 ///|
 struct Graph[N, E] {
   nodes : Array[Node[N]]
   edges : Array[Edge[E]]
   directed : Bool
-} derive(Show)
+}
 
 ///|
 fn NodeIndex::end() -> NodeIndex {
@@ -435,7 +435,7 @@ test "find_edge/undirected" {
   let node_b = graph.add_node(weight=1)
   let _ = graph.add_edge(node_a, node_b, weight=1)
   inspect(
-    graph.find_edge_undirected(node_a, node_b),
+    display_option(graph.find_edge_undirected(node_a, node_b)),
     content="Some({ix: 0, from: {ix: 2147483647}, successor_index: -1})",
   )
 }
@@ -584,7 +584,7 @@ test "from_edges" {
   inspect(g.node_count(), content="3")
   inspect(g.edge_count(), content="2")
   inspect(
-    g.find_edge_undirected(NodeIndex::new(0), NodeIndex::new(1)),
+    display_option(g.find_edge_undirected(NodeIndex::new(0), NodeIndex::new(1))),
     content="Some({ix: 0, from: {ix: 2147483647}, successor_index: -1})",
   )
 }
@@ -659,7 +659,7 @@ test "from_edges_with_weights" {
   inspect(g.node_count(), content="3")
   inspect(g.edge_count(), content="2")
   inspect(
-    g.find_edge_undirected(NodeIndex::new(0), NodeIndex::new(1)),
+    display_option(g.find_edge_undirected(NodeIndex::new(0), NodeIndex::new(1))),
     content="Some({ix: 0, from: {ix: 2147483647}, successor_index: -1})",
   )
   inspect(g.edges[0].weight, content="1")
@@ -855,9 +855,9 @@ test "remove_edge/single" {
   let edge_ab = g.add_edge(node_a, node_b, weight=1)
   g.add_edge(node_a, node_c, weight=2) |> ignore
   inspect(g.edge_count(), content="2")
-  inspect(g.remove_edge(edge_ab), content="Some(1)")
+  inspect(display_option(g.remove_edge(edge_ab)), content="Some(1)")
   inspect(g.edge_count(), content="1")
-  inspect(g.find_edge(node_a, node_b), content="None")
+  inspect(display_option(g.find_edge(node_a, node_b)), content="None")
 }
 
 ///|
@@ -869,15 +869,15 @@ test "remove_edge/multi" {
   let edge_ab = g.add_edge(node_a, node_b, weight=1)
   let edge_ac = g.add_edge(node_a, node_c, weight=2)
   inspect(g.edge_count(), content="2")
-  inspect(g.remove_edge(edge_ab), content="Some(1)")
+  inspect(display_option(g.remove_edge(edge_ab)), content="Some(1)")
   inspect(g.edge_count(), content="1")
-  inspect(g.find_edge(node_a, node_b), content="None")
+  inspect(display_option(g.find_edge(node_a, node_b)), content="None")
   // beacause the edge_ac is removed to the start of the list
   // so ix chenge from 1 -> 0
   let edge_ac = EdgeIndex::new(0, edge_ac.from, edge_ac.successor_index)
-  inspect(g.remove_edge(edge_ac), content="Some(2)")
+  inspect(display_option(g.remove_edge(edge_ac)), content="Some(2)")
   inspect(g.edge_count(), content="0")
-  inspect(g.find_edge(node_a, node_c), content="None")
+  inspect(display_option(g.find_edge(node_a, node_c)), content="None")
 }
 
 ///|
